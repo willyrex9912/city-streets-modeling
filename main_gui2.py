@@ -83,17 +83,17 @@ def agregar_flecha_evento(punto_inicial, punto_final, id_flecha):
 
     if id_circulo_inicial and id_circulo_final:
         flecha = canvas.create_line(punto_inicial[0], punto_inicial[1], punto_final[0], punto_final[1], width=2, arrow=tk.LAST, fill="yellow")
-        texto_id = canvas.create_text((punto_inicial[0] + punto_final[0]) / 2, (punto_inicial[1] + punto_final[1]) / 2, text=str(id_flecha), fill="white")  # Agregar texto con el ID
+        texto_id = canvas.create_text((punto_inicial[0] + punto_final[0]) / 2, (punto_inicial[1] + punto_final[1]) / 2 - 10, text=str(id_flecha), fill="white")  # Agregar texto con el ID sobre la línea
         canvas.tag_bind(flecha, "<Button-1>", empezar_arrastre)
         print(f"Se agregó la flecha {id_flecha} desde el círculo {id_circulo_inicial} hasta el círculo {id_circulo_final}")
     elif id_circulo_inicial:
         flecha = canvas.create_line(punto_inicial[0], punto_inicial[1], punto_final[0], punto_final[1], width=2, arrow=tk.LAST, fill="yellow")
-        texto_id = canvas.create_text((punto_inicial[0] + punto_final[0]) / 2, (punto_inicial[1] + punto_final[1]) / 2, text=str(id_flecha), fill="white")  # Agregar texto con el ID
+        texto_id = canvas.create_text((punto_inicial[0] + punto_final[0]) / 2, (punto_inicial[1] + punto_final[1]) / 2 - 10, text=str(id_flecha), fill="white")  # Agregar texto con el ID sobre la línea
         canvas.tag_bind(flecha, "<Button-1>", empezar_arrastre)
         print(f"Se agregó la flecha {id_flecha} desde el círculo {id_circulo_inicial} hasta {punto_final}")
     elif id_circulo_final:
         flecha = canvas.create_line(punto_inicial[0], punto_inicial[1], punto_final[0], punto_final[1], width=2, arrow=tk.LAST, fill="yellow")
-        texto_id = canvas.create_text((punto_inicial[0] + punto_final[0]) / 2, (punto_inicial[1] + punto_final[1]) / 2, text=str(id_flecha), fill="white")  # Agregar texto con el ID
+        texto_id = canvas.create_text((punto_inicial[0] + punto_final[0]) / 2, (punto_inicial[1] + punto_final[1]) / 2 - 10, text=str(id_flecha), fill="white")  # Agregar texto con el ID sobre la línea
         canvas.tag_bind(flecha, "<Button-1>", empezar_arrastre)
         print(f"Se agregó la flecha {id_flecha} desde {punto_inicial} hasta el círculo {id_circulo_final}")
     else:
