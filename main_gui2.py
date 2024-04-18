@@ -6,6 +6,7 @@ AGREGAR_FLECHA = False
 lastx = 0
 lasty = 0
 id_circulo = 1  # Inicializamos el identificador del círculo
+id_flecha = 1  # Inicializamos el identificador de la flecha
 
 def empezar_arrastre(event):
     global lastx, lasty
@@ -34,24 +35,22 @@ def capturar_punto_inicial(event):
     canvas.bind("<Button-1>", capturar_punto_final)  # Vincular evento de captura del punto final al lienzo
 
 def capturar_punto_final(event):
-    global punto_inicial
+    global punto_inicial, id_flecha
     punto_final = (event.x, event.y)
     conectar_con_circulo(punto_inicial, inicio=True)
     conectar_con_circulo(punto_final, inicio=False)
-    agregar_flecha_evento(punto_inicial, punto_final)
+    agregar_flecha_evento(punto_inicial, punto_final, id_flecha)
     punto_inicial = None  # Reiniciar el punto inicial
+    id_flecha += 1  # Incrementamos el identificador de la flecha
     canvas.bind("<Button-1>", agregar_elemento)  # Vincular evento de agregar flecha al lienzo
 
 def conectar_con_circulo(punto, inicio=True):
-    for circulo in canvas.find_all():
+    for circulo in canvas.find_withtag("circulo"):
         x1, y1, x2, y2 = canvas.coords(circulo)
         centro_x = (x1 + x2) / 2
         centro_y = (y1 + y2) / 2
         if (punto[0] - centro_x) ** 2 + (punto[1] - centro_y) ** 2 <= (25 ** 2):
-            if inicio:
-                print(f"El inicio de la flecha se conecta con el círculo {circulo}")
-            else:
-                print(f"El final de la flecha se conecta con el círculo {circulo}")
+            pass
 
 def agregar_elemento(event):
     global AGREGAR_CIRCULO, AGREGAR_FLECHA
@@ -64,13 +63,38 @@ def agregar_elemento(event):
 def agregar_circulo_evento(event):
     global id_circulo
     circulo = canvas.create_oval(event.x - 25, event.y - 25, event.x + 25, event.y + 25, fill="blue")
+    texto_id = canvas.create_text(event.x, event.y, text=str(id_circulo), fill="white")  # Agregar texto con el ID
+    canvas.itemconfig(circulo, tags=("circulo", f"{id_circulo}", texto_id))  # Asignar etiqueta al círculo y al texto
     print(f"Se agregó el círculo {id_circulo}")
     id_circulo += 1  # Incrementamos el identificador del círculo
 
-def agregar_flecha_evento(punto_inicial, punto_final):
-    flecha = canvas.create_line(punto_inicial[0], punto_inicial[1], punto_final[0], punto_final[1], width=2, arrow=tk.LAST, fill="yellow")
-    canvas.tag_bind(flecha, "<Button-1>", empezar_arrastre)
-    print("Se agregó una flecha")
+def agregar_flecha_evento(punto_inicial, punto_final, id_flecha):
+    id_circulo_inicial = None
+    id_circulo_final = None
+
+    for circulo in canvas.find_withtag("circulo"):
+        x1, y1, x2, y2 = canvas.coords(circulo)
+        centro_x = (x1 + x2) / 2
+        centro_y = (y1 + y2) / 2
+        if punto_inicial[0] >= x1 and punto_inicial[0] <= x2 and punto_inicial[1] >= y1 and punto_inicial[1] <= y2:
+            id_circulo_inicial = canvas.gettags(circulo)[1]  # Obtener la etiqueta del círculo inicial
+        if punto_final[0] >= x1 and punto_final[0] <= x2 and punto_final[1] >= y1 and punto_final[1] <= y2:
+            id_circulo_final = canvas.gettags(circulo)[1]  # Obtener la etiqueta del círculo final
+
+    if id_circulo_inicial and id_circulo_final:
+        flecha = canvas.create_line(punto_inicial[0], punto_inicial[1], punto_final[0], punto_final[1], width=2, arrow=tk.LAST, fill="yellow")
+        canvas.tag_bind(flecha, "<Button-1>", empezar_arrastre)
+        print(f"Se agregó la flecha {id_flecha} desde el círculo {id_circulo_inicial} hasta el círculo {id_circulo_final}")
+    elif id_circulo_inicial:
+        flecha = canvas.create_line(punto_inicial[0], punto_inicial[1], punto_final[0], punto_final[1], width=2, arrow=tk.LAST, fill="yellow")
+        canvas.tag_bind(flecha, "<Button-1>", empezar_arrastre)
+        print(f"Se agregó la flecha {id_flecha} desde el círculo {id_circulo_inicial} hasta {punto_final}")
+    elif id_circulo_final:
+        flecha = canvas.create_line(punto_inicial[0], punto_inicial[1], punto_final[0], punto_final[1], width=2, arrow=tk.LAST, fill="yellow")
+        canvas.tag_bind(flecha, "<Button-1>", empezar_arrastre)
+        print(f"Se agregó la flecha {id_flecha} desde {punto_inicial} hasta el círculo {id_circulo_final}")
+    else:
+        print("Error: No se encontraron círculos conectados")
 
 # Crear ventana
 ventana = tk.Tk()
