@@ -1,116 +1,96 @@
 import tkinter as tk
 
+# Variables globales para controlar el tipo de elemento a agregar y la bandera del botón
+AGREGAR_CIRCULO = False
+AGREGAR_FLECHA = False
+lastx = 0
+lasty = 0
+id_circulo = 1  # Inicializamos el identificador del círculo
 
-class Circle:
-    def __init__(self, canvas, x, y, radius):
-        self.initial_y = None
-        self.initial_x = None
-        self.canvas = canvas
-        self.object = canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill="blue")
-        self.canvas.tag_bind(self.object, "<Button-1>", self.click)
-        self.canvas.tag_bind(self.object, "<B1-Motion>", self.move)
-        self.x = x
-        self.y = y
-        self.connections = []  # Lista de círculos conectados a este círculo
-        self.connected_lines = []  # Lista de líneas conectadas a este círculo
+def empezar_arrastre(event):
+    global lastx, lasty
+    lastx = event.x
+    lasty = event.y
+    canvas.tag_raise(tk.CURRENT)  # Eleva el elemento seleccionado al frente
 
-    def click(self, event):
-        self.initial_x = event.x
-        self.initial_y = event.y
+def arrastrar(event):
+    pass  # No hacer nada para evitar el arrastre de los elementos
 
-    def move(self, event):
-        delta_x = event.x - self.initial_x
-        delta_y = event.y - self.initial_y
-        self.canvas.move(self.object, delta_x, delta_y)
-        self.initial_x = event.x
-        self.initial_y = event.y
-        self.x += delta_x
-        self.y += delta_y
-        # Actualizar la posición de las líneas conectadas
-        for line in self.connected_lines:
-            line.update()
+def agregar_circulo():
+    global AGREGAR_CIRCULO, AGREGAR_FLECHA
+    AGREGAR_CIRCULO = True
+    AGREGAR_FLECHA = False
+    canvas.bind("<Button-1>", agregar_elemento)  # Vincular evento de agregar círculo al lienzo
 
-        # Actualizar la posición de los extremos de las líneas conectadas
-        for circle in self.connections:
-            for line in circle.connected_lines:
-                if line.circle_1 == self or line.circle_2 == self:
-                    line.update()
+def agregar_flecha():
+    global AGREGAR_CIRCULO, AGREGAR_FLECHA
+    AGREGAR_CIRCULO = False
+    AGREGAR_FLECHA = True
+    canvas.bind("<Button-1>", capturar_punto_inicial)  # Vincular evento de captura del punto inicial al lienzo
 
-    def add_connection(self, other_circle):
-        # Agregar otro círculo a la lista de conexiones
-        self.connections.append(other_circle)
+def capturar_punto_inicial(event):
+    global punto_inicial
+    punto_inicial = (event.x, event.y)
+    canvas.bind("<Button-1>", capturar_punto_final)  # Vincular evento de captura del punto final al lienzo
 
+def capturar_punto_final(event):
+    global punto_inicial
+    punto_final = (event.x, event.y)
+    conectar_con_circulo(punto_inicial, inicio=True)
+    conectar_con_circulo(punto_final, inicio=False)
+    agregar_flecha_evento(punto_inicial, punto_final)
+    punto_inicial = None  # Reiniciar el punto inicial
+    canvas.bind("<Button-1>", agregar_elemento)  # Vincular evento de agregar flecha al lienzo
 
-class Line:
-    def __init__(self, canvas, circle_1, circle_2):
-        self.canvas = canvas
-        self.circle_1 = circle_1
-        self.circle_2 = circle_2
-        self.line = canvas.create_line(circle_1.x, circle_1.y, circle_2.x, circle_2.y, fill="red")
+def conectar_con_circulo(punto, inicio=True):
+    for circulo in canvas.find_all():
+        x1, y1, x2, y2 = canvas.coords(circulo)
+        centro_x = (x1 + x2) / 2
+        centro_y = (y1 + y2) / 2
+        if (punto[0] - centro_x) ** 2 + (punto[1] - centro_y) ** 2 <= (25 ** 2):
+            if inicio:
+                print(f"El inicio de la flecha se conecta con el círculo {circulo}")
+            else:
+                print(f"El final de la flecha se conecta con el círculo {circulo}")
 
-    def update(self):
-        # Actualizar la posición de la línea para seguir conectando los círculos
-        self.canvas.coords(self.line, self.circle_1.x, self.circle_1.y, self.circle_2.x, self.circle_2.y)
+def agregar_elemento(event):
+    global AGREGAR_CIRCULO, AGREGAR_FLECHA
+    if AGREGAR_CIRCULO:
+        agregar_circulo_evento(event)
+        canvas.unbind("<Button-1>")  # Desvincular evento de clic del lienzo después de agregar un círculo
+    elif AGREGAR_FLECHA:
+        pass  # No hacer nada al hacer clic si estamos agregando flecha
 
+def agregar_circulo_evento(event):
+    global id_circulo
+    circulo = canvas.create_oval(event.x - 25, event.y - 25, event.x + 25, event.y + 25, fill="blue")
+    print(f"Se agregó el círculo {id_circulo}")
+    id_circulo += 1  # Incrementamos el identificador del círculo
 
-class Application:
-    def __init__(self, window):
-        self.window = window
-        self.window.title("Agregar y Mover Figuras")
+def agregar_flecha_evento(punto_inicial, punto_final):
+    flecha = canvas.create_line(punto_inicial[0], punto_inicial[1], punto_final[0], punto_final[1], width=2, arrow=tk.LAST, fill="yellow")
+    canvas.tag_bind(flecha, "<Button-1>", empezar_arrastre)
+    print("Se agregó una flecha")
 
-        self.canvas = tk.Canvas(window, width=1200, height=600, bg="white")
-        self.canvas.pack()
+# Crear ventana
+ventana = tk.Tk()
+ventana.title("Agregar y Mover Elementos")
+ventana.geometry("1200x600")  # Tamaño de la ventana
 
-        self.btn_add_circle = tk.Button(window, text="Agregar Círculo", command=self.add_circle)
-        self.btn_add_circle.pack()
+# Crear botones para cambiar entre círculos y flechas
+boton_circulo = tk.Button(ventana, text="Agregar Círculo", command=agregar_circulo)
+boton_circulo.grid(row=0, column=0, padx=5, pady=5)
 
-        self.btn_add_line = tk.Button(window, text="Agregar Línea", command=self.init_connection)
-        self.btn_add_line.pack()
+boton_flecha = tk.Button(ventana, text="Agregar Flecha", command=agregar_flecha)
+boton_flecha.grid(row=0, column=1, padx=5, pady=5)
 
-        self.figures = []
-        self.connect = False
-        self.selected_circles = []
+# Crear lienzo con fondo negro
+canvas = tk.Canvas(ventana, width=1200, height=600, bg="black")
+canvas.grid(row=1, column=0, columnspan=2)
 
-    def add_circle(self):
-        x = 200  # Coordenada x central
-        y = 200  # Coordenada y central
-        radius = 20
-        new_circle = Circle(self.canvas, x, y, radius)
-        self.figures.append(new_circle)
+# Botón para salir
+boton_salir = tk.Button(ventana, text="Salir", command=ventana.quit)
+boton_salir.grid(row=2, column=0, columnspan=2, pady=10)
 
-    def init_connection(self):
-        if len(self.figures) >= 2:
-            self.connect = True
-            self.selected_circles = []
-
-    def connect_circle(self, circle):
-        if self.connect:
-            self.selected_circles.append(circle)
-            if len(self.selected_circles) == 2:
-                # Conectar los dos círculos con una línea
-                circle_1 = self.selected_circles[0]
-                circle_2 = self.selected_circles[1]
-                circle_1.add_connection(circle_2)
-                circle_2.add_connection(circle_1)
-                new_line = Line(self.canvas, circle_1, circle_2)
-                circle_1.connected_lines.append(new_line)
-                circle_2.connected_lines.append(new_line)
-                self.figures.append(new_line)
-                self.connect = False
-                self.selected_circles = []
-                print("Line connected")
-
-    def click_circle(self, event):
-        if self.connect:
-            item = self.canvas.find_closest(event.x, event.y)
-            for figure in self.figures:
-                if isinstance(figure, Circle) and figure.object == item[0]:
-                    self.connect_circle(figure)
-                    break
-
-
-if __name__ == "__main__":
-    window = tk.Tk()
-    app = Application(window)
-    window.bind("<Button-1>", app.click_circle)
-    window.mainloop()
+# Ejecutar el bucle principal
+ventana.mainloop()
