@@ -1,43 +1,43 @@
 import tkinter as tk
 
 
-class Circulo:
-    def __init__(self, canvas, x, y, radio):
+class Circle:
+    def __init__(self, canvas, x, y, radius):
         self.canvas = canvas
-        self.objeto = canvas.create_oval(x - radio, y - radio, x + radio, y + radio, fill="blue")
-        self.canvas.tag_bind(self.objeto, "<Button-1>", self.click)
-        self.canvas.tag_bind(self.objeto, "<B1-Motion>", self.move)
+        self.object = canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill="blue")
+        self.canvas.tag_bind(self.object, "<Button-1>", self.click)
+        self.canvas.tag_bind(self.object, "<B1-Motion>", self.move)
         self.x = x
         self.y = y
-        self.conexiones = []  # Lista de círculos conectados a este círculo
-        self.lineas_conectadas = []  # Lista de líneas conectadas a este círculo
+        self.connections = []  # Lista de círculos conectados a este círculo
+        self.connected_lines = []  # Lista de líneas conectadas a este círculo
 
     def click(self, event):
-        self.x_inicial = event.x
-        self.y_inicial = event.y
+        self.initial_x = event.x
+        self.initial_y = event.y
 
     def move(self, event):
-        deltax = event.x - self.x_inicial
-        deltay = event.y - self.y_inicial
-        self.canvas.move(self.objeto, deltax, deltay)
-        self.x_inicial = event.x
-        self.y_inicial = event.y
-        self.x += deltax
-        self.y += deltay
+        delta_x = event.x - self.initial_x
+        delta_y = event.y - self.initial_y
+        self.canvas.move(self.object, delta_x, delta_y)
+        self.initial_x = event.x
+        self.initial_y = event.y
+        self.x += delta_x
+        self.y += delta_y
         # Actualizar la posición de las líneas conectadas
-        for linea in self.lineas_conectadas:
-            linea.actualizar()
+        for linea in self.connected_lines:
+            linea.update()
 
         # Actualizar la posición de los extremos de las líneas conectadas
-        for circulo in self.conexiones:
-            for linea in circulo.lineas_conectadas:
+        for circulo in self.connections:
+            for linea in circulo.connected_lines:
                 if linea.circulo1 == self or linea.circulo2 == self:
-                    linea.actualizar()
+                    linea.update()
 
 
     def agregar_conexion(self, otro_circulo):
         # Agregar otro círculo a la lista de conexiones
-        self.conexiones.append(otro_circulo)
+        self.connections.append(otro_circulo)
 
 
 class Linea:
@@ -47,7 +47,7 @@ class Linea:
         self.circulo2 = circulo2
         self.linea = canvas.create_line(circulo1.x, circulo1.y, circulo2.x, circulo2.y, fill="red")
 
-    def actualizar(self):
+    def update(self):
         # Actualizar la posición de la línea para seguir conectando los círculos
         self.canvas.coords(self.linea, self.circulo1.x, self.circulo1.y, self.circulo2.x, self.circulo2.y)
 
@@ -74,7 +74,7 @@ class Aplicacion:
         x = 200  # Coordenada x central
         y = 200  # Coordenada y central
         radio = 20
-        nuevo_circulo = Circulo(self.canvas, x, y, radio)
+        nuevo_circulo = Circle(self.canvas, x, y, radio)
         self.figuras.append(nuevo_circulo)
 
     def iniciar_conexion(self):
@@ -92,8 +92,8 @@ class Aplicacion:
                 circulo1.agregar_conexion(circulo2)
                 circulo2.agregar_conexion(circulo1)
                 nueva_linea = Linea(self.canvas, circulo1, circulo2)
-                circulo1.lineas_conectadas.append(nueva_linea)
-                circulo2.lineas_conectadas.append(nueva_linea)
+                circulo1.connected_lines.append(nueva_linea)
+                circulo2.connected_lines.append(nueva_linea)
                 self.figuras.append(nueva_linea)
                 self.conectar = False
                 self.circulos_seleccionados = []
@@ -102,7 +102,7 @@ class Aplicacion:
         if self.conectar:
             item = self.canvas.find_closest(event.x, event.y)
             for figura in self.figuras:
-                if isinstance(figura, Circulo) and figura.objeto == item[0]:
+                if isinstance(figura, Circle) and figura.object == item[0]:
                     self.conectar_circulo(figura)
                     break
 
