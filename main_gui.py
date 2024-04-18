@@ -58,7 +58,7 @@ class Application:
         self.window = window
         self.window.title("Agregar y Mover Figuras")
 
-        self.canvas = tk.Canvas(window, width=400, height=400, bg="white")
+        self.canvas = tk.Canvas(window, width=1200, height=600, bg="white")
         self.canvas.pack()
 
         self.btn_add_circle = tk.Button(window, text="Agregar Círculo", command=self.add_circle)
@@ -98,6 +98,7 @@ class Application:
                 self.figures.append(new_line)
                 self.connect = False
                 self.selected_circles = []
+                print("Line connected")
 
     def click_circle(self, event):
         if self.connect:
