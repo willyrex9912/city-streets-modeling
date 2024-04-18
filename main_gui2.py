@@ -1,101 +1,111 @@
 import tkinter as tk
 
 # Variables globales para controlar el tipo de elemento a agregar y la bandera del botón
-AGREGAR_CIRCULO = False
-AGREGAR_FLECHA = False
-lastx = 0
-lasty = 0
-id_circulo = 1  # Inicializamos el identificador del círculo
-id_flecha = 1  # Inicializamos el identificador de la flecha
+ADD_CROSS_STREETS = False
+ADD_STREET = False
+last_x = 0
+last_y = 0
+id_cross_streets = 1  # Inicializamos el identificador del círculo
+id_street = 1  # Inicializamos el identificador de la flecha
 
-def empezar_arrastre(event):
-    global lastx, lasty
-    lastx = event.x
-    lasty = event.y
+
+def start_drag(event):
+    global last_x, last_y
+    last_x = event.x
+    last_y = event.y
     canvas.tag_raise(tk.CURRENT)  # Eleva el elemento seleccionado al frente
 
-def arrastrar(event):
+
+def drag(event):
     pass  # No hacer nada para evitar el arrastre de los elementos
 
-def agregar_circulo():
-    global AGREGAR_CIRCULO, AGREGAR_FLECHA
-    AGREGAR_CIRCULO = True
-    AGREGAR_FLECHA = False
-    canvas.bind("<Button-1>", agregar_elemento)  # Vincular evento de agregar círculo al lienzo
 
-def agregar_flecha():
-    global AGREGAR_CIRCULO, AGREGAR_FLECHA
-    AGREGAR_CIRCULO = False
-    AGREGAR_FLECHA = True
-    canvas.bind("<Button-1>", capturar_punto_inicial)  # Vincular evento de captura del punto inicial al lienzo
+def add_cross_streets():
+    global ADD_CROSS_STREETS, ADD_STREET
+    ADD_CROSS_STREETS = True
+    ADD_STREET = False
+    canvas.bind("<Button-1>", add_element)  # Vincular evento de agregar círculo al lienzo
 
-def capturar_punto_inicial(event):
-    global punto_inicial
-    punto_inicial = (event.x, event.y)
-    canvas.bind("<Button-1>", capturar_punto_final)  # Vincular evento de captura del punto final al lienzo
 
-def capturar_punto_final(event):
-    global punto_inicial, id_flecha
-    punto_final = (event.x, event.y)
-    conectar_con_circulo(punto_inicial, inicio=True)
-    conectar_con_circulo(punto_final, inicio=False)
-    agregar_flecha_evento(punto_inicial, punto_final, id_flecha)
-    punto_inicial = None  # Reiniciar el punto inicial
-    id_flecha += 1  # Incrementamos el identificador de la flecha
-    canvas.bind("<Button-1>", agregar_elemento)  # Vincular evento de agregar flecha al lienzo
+def add_street():
+    global ADD_CROSS_STREETS, ADD_STREET
+    ADD_CROSS_STREETS = False
+    ADD_STREET = True
+    canvas.bind("<Button-1>", capture_initial_point)  # Vincular evento de captura del punto inicial al lienzo
 
-def conectar_con_circulo(punto, inicio=True):
-    for circulo in canvas.find_withtag("circulo"):
-        x1, y1, x2, y2 = canvas.coords(circulo)
-        centro_x = (x1 + x2) / 2
-        centro_y = (y1 + y2) / 2
-        if (punto[0] - centro_x) ** 2 + (punto[1] - centro_y) ** 2 <= (25 ** 2):
+
+def capture_initial_point(event):
+    global initial_point
+    initial_point = (event.x, event.y)
+    canvas.bind("<Button-1>", capture_final_point)  # Vincular evento de captura del punto final al lienzo
+
+
+def capture_final_point(event):
+    global initial_point, id_street
+    final_point = (event.x, event.y)
+    connect_with_cross_streets(initial_point, initial=True)
+    connect_with_cross_streets(final_point, initial=False)
+    add_street_event(initial_point, final_point, id_street)
+    initial_point = None  # Reiniciar el punto inicial
+    id_street += 1  # Incrementamos el identificador de la flecha
+    canvas.bind("<Button-1>", add_element)  # Vincular evento de agregar flecha al lienzo
+
+
+def connect_with_cross_streets(point, initial=True):
+    for cross_streets in canvas.find_withtag("cross_streets"):
+        x1, y1, x2, y2 = canvas.coords(cross_streets)
+        center_x = (x1 + x2) / 2
+        center_y = (y1 + y2) / 2
+        if (point[0] - center_x) ** 2 + (point[1] - center_y) ** 2 <= (25 ** 2):
             pass
 
-def agregar_elemento(event):
-    global AGREGAR_CIRCULO, AGREGAR_FLECHA
-    if AGREGAR_CIRCULO:
-        agregar_circulo_evento(event)
+
+def add_element(event):
+    global ADD_CROSS_STREETS, ADD_STREET
+    if ADD_CROSS_STREETS:
+        add_cross_streets_event(event)
         canvas.unbind("<Button-1>")  # Desvincular evento de clic del lienzo después de agregar un círculo
-    elif AGREGAR_FLECHA:
+    elif ADD_STREET:
         pass  # No hacer nada al hacer clic si estamos agregando flecha
 
-def agregar_circulo_evento(event):
-    global id_circulo
-    circulo = canvas.create_oval(event.x - 25, event.y - 25, event.x + 25, event.y + 25, fill="blue")
-    texto_id = canvas.create_text(event.x, event.y, text=str(id_circulo), fill="white")  # Agregar texto con el ID
-    canvas.itemconfig(circulo, tags=("circulo", f"{id_circulo}", texto_id))  # Asignar etiqueta al círculo y al texto
-    print(f"Se agregó el círculo {id_circulo}")
-    id_circulo += 1  # Incrementamos el identificador del círculo
 
-def agregar_flecha_evento(punto_inicial, punto_final, id_flecha):
-    id_circulo_inicial = None
-    id_circulo_final = None
+def add_cross_streets_event(event):
+    global id_cross_streets
+    cross_streets = canvas.create_oval(event.x - 25, event.y - 25, event.x + 25, event.y + 25, fill="blue")
+    id_text = canvas.create_text(event.x, event.y, text=str(id_cross_streets), fill="white")  # Agregar texto con el ID
+    canvas.itemconfig(cross_streets, tags=("cross_streets", f"{id_cross_streets}", id_text))  # Asignar etiqueta al círculo y al texto
+    print(f"Cross streets {id_cross_streets} added.")
+    id_cross_streets += 1  # Incrementamos el identificador del círculo
 
-    for circulo in canvas.find_withtag("circulo"):
-        x1, y1, x2, y2 = canvas.coords(circulo)
-        centro_x = (x1 + x2) / 2
-        centro_y = (y1 + y2) / 2
-        if punto_inicial[0] >= x1 and punto_inicial[0] <= x2 and punto_inicial[1] >= y1 and punto_inicial[1] <= y2:
-            id_circulo_inicial = canvas.gettags(circulo)[1]  # Obtener la etiqueta del círculo inicial
-        if punto_final[0] >= x1 and punto_final[0] <= x2 and punto_final[1] >= y1 and punto_final[1] <= y2:
-            id_circulo_final = canvas.gettags(circulo)[1]  # Obtener la etiqueta del círculo final
 
-    if id_circulo_inicial and id_circulo_final:
-        flecha = canvas.create_line(punto_inicial[0], punto_inicial[1], punto_final[0], punto_final[1], width=2, arrow=tk.LAST, fill="yellow")
-        texto_id = canvas.create_text((punto_inicial[0] + punto_final[0]) / 2, (punto_inicial[1] + punto_final[1]) / 2 - 10, text=str(id_flecha), fill="white")  # Agregar texto con el ID sobre la línea
-        canvas.tag_bind(flecha, "<Button-1>", empezar_arrastre)
-        print(f"Se agregó la flecha {id_flecha} desde el círculo {id_circulo_inicial} hasta el círculo {id_circulo_final}")
-    elif id_circulo_inicial:
-        flecha = canvas.create_line(punto_inicial[0], punto_inicial[1], punto_final[0], punto_final[1], width=2, arrow=tk.LAST, fill="yellow")
-        texto_id = canvas.create_text((punto_inicial[0] + punto_final[0]) / 2, (punto_inicial[1] + punto_final[1]) / 2 - 10, text=str(id_flecha), fill="white")  # Agregar texto con el ID sobre la línea
-        canvas.tag_bind(flecha, "<Button-1>", empezar_arrastre)
-        print(f"Se agregó la flecha {id_flecha} desde el círculo {id_circulo_inicial} hasta {punto_final}")
-    elif id_circulo_final:
-        flecha = canvas.create_line(punto_inicial[0], punto_inicial[1], punto_final[0], punto_final[1], width=2, arrow=tk.LAST, fill="yellow")
-        texto_id = canvas.create_text((punto_inicial[0] + punto_final[0]) / 2, (punto_inicial[1] + punto_final[1]) / 2 - 10, text=str(id_flecha), fill="white")  # Agregar texto con el ID sobre la línea
-        canvas.tag_bind(flecha, "<Button-1>", empezar_arrastre)
-        print(f"Se agregó la flecha {id_flecha} desde {punto_inicial} hasta el círculo {id_circulo_final}")
+def add_street_event(initial_point, final_point, street_id):
+    initial_cross_streets_id = None
+    final_cross_streets_id = None
+
+    for cross_streets in canvas.find_withtag("cross_streets"):
+        x1, y1, x2, y2 = canvas.coords(cross_streets)
+        center_x = (x1 + x2) / 2
+        center_y = (y1 + y2) / 2
+        if initial_point[0] >= x1 and initial_point[0] <= x2 and initial_point[1] >= y1 and initial_point[1] <= y2:
+            initial_cross_streets_id = canvas.gettags(cross_streets)[1]  # Obtener la etiqueta del círculo inicial
+        if final_point[0] >= x1 and final_point[0] <= x2 and final_point[1] >= y1 and final_point[1] <= y2:
+            final_cross_streets_id = canvas.gettags(cross_streets)[1]  # Obtener la etiqueta del círculo final
+
+    if initial_cross_streets_id and final_cross_streets_id:
+        flecha = canvas.create_line(initial_point[0], initial_point[1], final_point[0], final_point[1], width=2, arrow=tk.LAST, fill="yellow")
+        texto_id = canvas.create_text((initial_point[0] + final_point[0]) / 2, (initial_point[1] + final_point[1]) / 2 - 10, text=str(street_id), fill="white")  # Agregar texto con el ID sobre la línea
+        canvas.tag_bind(flecha, "<Button-1>", start_drag)
+        print(f"Se agregó la flecha {street_id} desde el círculo {initial_cross_streets_id} hasta el círculo {final_cross_streets_id}")
+    elif initial_cross_streets_id:
+        flecha = canvas.create_line(initial_point[0], initial_point[1], final_point[0], final_point[1], width=2, arrow=tk.LAST, fill="yellow")
+        texto_id = canvas.create_text((initial_point[0] + final_point[0]) / 2, (initial_point[1] + final_point[1]) / 2 - 10, text=str(street_id), fill="white")  # Agregar texto con el ID sobre la línea
+        canvas.tag_bind(flecha, "<Button-1>", start_drag)
+        print(f"Se agregó la flecha {street_id} desde el círculo {initial_cross_streets_id} hasta {final_point}")
+    elif final_cross_streets_id:
+        flecha = canvas.create_line(initial_point[0], initial_point[1], final_point[0], final_point[1], width=2, arrow=tk.LAST, fill="yellow")
+        texto_id = canvas.create_text((initial_point[0] + final_point[0]) / 2, (initial_point[1] + final_point[1]) / 2 - 10, text=str(street_id), fill="white")  # Agregar texto con el ID sobre la línea
+        canvas.tag_bind(flecha, "<Button-1>", start_drag)
+        print(f"Se agregó la flecha {street_id} desde {initial_point} hasta el círculo {final_cross_streets_id}")
     else:
         print("Error: No se encontraron círculos conectados")
 
@@ -105,10 +115,10 @@ ventana.title("Agregar y Mover Elementos")
 ventana.geometry("1200x600")  # Tamaño de la ventana
 
 # Crear botones para cambiar entre círculos y flechas
-boton_circulo = tk.Button(ventana, text="Agregar Círculo", command=agregar_circulo)
+boton_circulo = tk.Button(ventana, text="Agregar Círculo", command=add_cross_streets)
 boton_circulo.grid(row=0, column=0, padx=5, pady=5)
 
-boton_flecha = tk.Button(ventana, text="Agregar Flecha", command=agregar_flecha)
+boton_flecha = tk.Button(ventana, text="Agregar Flecha", command=add_street)
 boton_flecha.grid(row=0, column=1, padx=5, pady=5)
 
 # Crear lienzo con fondo negro
