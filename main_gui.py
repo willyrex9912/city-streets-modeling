@@ -41,16 +41,16 @@ class Circle:
         self.connections.append(other_circle)
 
 
-class Linea:
-    def __init__(self, canvas, circulo1, circulo2):
+class Line:
+    def __init__(self, canvas, circle_1, circle_2):
         self.canvas = canvas
-        self.circle_1 = circulo1
-        self.circle_2 = circulo2
-        self.linea = canvas.create_line(circulo1.x, circulo1.y, circulo2.x, circulo2.y, fill="red")
+        self.circle_1 = circle_1
+        self.circle_2 = circle_2
+        self.line = canvas.create_line(circle_1.x, circle_1.y, circle_2.x, circle_2.y, fill="red")
 
     def update(self):
         # Actualizar la posición de la línea para seguir conectando los círculos
-        self.canvas.coords(self.linea, self.circle_1.x, self.circle_1.y, self.circle_2.x, self.circle_2.y)
+        self.canvas.coords(self.line, self.circle_1.x, self.circle_1.y, self.circle_2.x, self.circle_2.y)
 
 
 class Application:
@@ -74,8 +74,8 @@ class Application:
     def add_circle(self):
         x = 200  # Coordenada x central
         y = 200  # Coordenada y central
-        radio = 20
-        new_circle = Circle(self.canvas, x, y, radio)
+        radius = 20
+        new_circle = Circle(self.canvas, x, y, radius)
         self.figures.append(new_circle)
 
     def init_connection(self):
@@ -92,7 +92,7 @@ class Application:
                 circle_2 = self.selected_circles[1]
                 circle_1.add_connection(circle_2)
                 circle_2.add_connection(circle_1)
-                new_line = Linea(self.canvas, circle_1, circle_2)
+                new_line = Line(self.canvas, circle_1, circle_2)
                 circle_1.connected_lines.append(new_line)
                 circle_2.connected_lines.append(new_line)
                 self.figures.append(new_line)
