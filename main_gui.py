@@ -33,84 +33,83 @@ class Circle:
         # Actualizar la posición de los extremos de las líneas conectadas
         for circle in self.connections:
             for line in circle.connected_lines:
-                if line.circulo1 == self or line.circulo2 == self:
+                if line.circle_1 == self or line.circle_2 == self:
                     line.update()
 
-
-    def agregar_conexion(self, otro_circulo):
+    def add_connection(self, other_circle):
         # Agregar otro círculo a la lista de conexiones
-        self.connections.append(otro_circulo)
+        self.connections.append(other_circle)
 
 
 class Linea:
     def __init__(self, canvas, circulo1, circulo2):
         self.canvas = canvas
-        self.circulo1 = circulo1
-        self.circulo2 = circulo2
+        self.circle_1 = circulo1
+        self.circle_2 = circulo2
         self.linea = canvas.create_line(circulo1.x, circulo1.y, circulo2.x, circulo2.y, fill="red")
 
     def update(self):
         # Actualizar la posición de la línea para seguir conectando los círculos
-        self.canvas.coords(self.linea, self.circulo1.x, self.circulo1.y, self.circulo2.x, self.circulo2.y)
+        self.canvas.coords(self.linea, self.circle_1.x, self.circle_1.y, self.circle_2.x, self.circle_2.y)
 
 
-class Aplicacion:
-    def __init__(self, ventana):
-        self.ventana = ventana
-        self.ventana.title("Agregar y Mover Figuras")
+class Application:
+    def __init__(self, window):
+        self.window = window
+        self.window.title("Agregar y Mover Figuras")
 
-        self.canvas = tk.Canvas(ventana, width=400, height=400, bg="white")
+        self.canvas = tk.Canvas(window, width=400, height=400, bg="white")
         self.canvas.pack()
 
-        self.btn_agregar_circulo = tk.Button(ventana, text="Agregar Círculo", command=self.agregar_circulo)
-        self.btn_agregar_circulo.pack()
+        self.btn_add_circle = tk.Button(window, text="Agregar Círculo", command=self.add_circle)
+        self.btn_add_circle.pack()
 
-        self.btn_agregar_linea = tk.Button(ventana, text="Agregar Línea", command=self.iniciar_conexion)
-        self.btn_agregar_linea.pack()
+        self.btn_add_line = tk.Button(window, text="Agregar Línea", command=self.init_connection)
+        self.btn_add_line.pack()
 
-        self.figuras = []
-        self.conectar = False
-        self.circulos_seleccionados = []
+        self.figures = []
+        self.connect = False
+        self.selected_circles = []
 
-    def agregar_circulo(self):
+    def add_circle(self):
         x = 200  # Coordenada x central
         y = 200  # Coordenada y central
         radio = 20
-        nuevo_circulo = Circle(self.canvas, x, y, radio)
-        self.figuras.append(nuevo_circulo)
+        new_circle = Circle(self.canvas, x, y, radio)
+        self.figures.append(new_circle)
 
-    def iniciar_conexion(self):
-        if len(self.figuras) >= 2:
-            self.conectar = True
-            self.circulos_seleccionados = []
+    def init_connection(self):
+        if len(self.figures) >= 2:
+            self.connect = True
+            self.selected_circles = []
 
-    def conectar_circulo(self, circulo):
-        if self.conectar:
-            self.circulos_seleccionados.append(circulo)
-            if len(self.circulos_seleccionados) == 2:
+    def connect_circle(self, circle):
+        if self.connect:
+            self.selected_circles.append(circle)
+            if len(self.selected_circles) == 2:
                 # Conectar los dos círculos con una línea
-                circulo1 = self.circulos_seleccionados[0]
-                circulo2 = self.circulos_seleccionados[1]
-                circulo1.agregar_conexion(circulo2)
-                circulo2.agregar_conexion(circulo1)
-                nueva_linea = Linea(self.canvas, circulo1, circulo2)
-                circulo1.connected_lines.append(nueva_linea)
-                circulo2.connected_lines.append(nueva_linea)
-                self.figuras.append(nueva_linea)
-                self.conectar = False
-                self.circulos_seleccionados = []
+                circle_1 = self.selected_circles[0]
+                circle_2 = self.selected_circles[1]
+                circle_1.add_connection(circle_2)
+                circle_2.add_connection(circle_1)
+                new_line = Linea(self.canvas, circle_1, circle_2)
+                circle_1.connected_lines.append(new_line)
+                circle_2.connected_lines.append(new_line)
+                self.figures.append(new_line)
+                self.connect = False
+                self.selected_circles = []
 
-    def click_circulo(self, event):
-        if self.conectar:
+    def click_circle(self, event):
+        if self.connect:
             item = self.canvas.find_closest(event.x, event.y)
-            for figura in self.figuras:
-                if isinstance(figura, Circle) and figura.object == item[0]:
-                    self.conectar_circulo(figura)
+            for figure in self.figures:
+                if isinstance(figure, Circle) and figure.object == item[0]:
+                    self.connect_circle(figure)
                     break
 
 
 if __name__ == "__main__":
-    ventana = tk.Tk()
-    app = Aplicacion(ventana)
-    ventana.bind("<Button-1>", app.click_circulo)
-    ventana.mainloop()
+    window = tk.Tk()
+    app = Application(window)
+    window.bind("<Button-1>", app.click_circle)
+    window.mainloop()
