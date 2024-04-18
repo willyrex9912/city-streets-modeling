@@ -3,6 +3,8 @@ import tkinter as tk
 
 class Circle:
     def __init__(self, canvas, x, y, radius):
+        self.initial_y = None
+        self.initial_x = None
         self.canvas = canvas
         self.object = canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill="blue")
         self.canvas.tag_bind(self.object, "<Button-1>", self.click)
@@ -25,14 +27,14 @@ class Circle:
         self.x += delta_x
         self.y += delta_y
         # Actualizar la posición de las líneas conectadas
-        for linea in self.connected_lines:
-            linea.update()
+        for line in self.connected_lines:
+            line.update()
 
         # Actualizar la posición de los extremos de las líneas conectadas
-        for circulo in self.connections:
-            for linea in circulo.connected_lines:
-                if linea.circulo1 == self or linea.circulo2 == self:
-                    linea.update()
+        for circle in self.connections:
+            for line in circle.connected_lines:
+                if line.circulo1 == self or line.circulo2 == self:
+                    line.update()
 
 
     def agregar_conexion(self, otro_circulo):
