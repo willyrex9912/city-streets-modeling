@@ -1,7 +1,8 @@
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox
 from typing import Dict
 from model.cross_streets import CrossStreets
 from model.street import Street
+from enums.direction import Direction
 import tkinter as tk
 
 
@@ -120,6 +121,8 @@ class StreetSchemaEditor:
             self.canvas.tag_bind(street, "<Button-1>", self.start_drag)
             new_street = Street(street_id, int(initial_cross_streets_id), int(final_cross_streets_id))
             self.street_map[street_id] = new_street
+            self.cross_streets_map[new_street.start_cross_id].add_street(street_id, Direction.START)
+            self.cross_streets_map[new_street.end_cross_id].add_street(street_id, Direction.END)
             print(f"Street {street_id} from {initial_cross_streets_id} to {final_cross_streets_id} added.")
         elif initial_cross_streets_id:
             street = self.canvas.create_line(initial_point[0], initial_point[1], final_point[0], final_point[1],
@@ -129,6 +132,7 @@ class StreetSchemaEditor:
             self.canvas.tag_bind(street, "<Button-1>", self.start_drag)
             new_street = Street(street_id, int(initial_cross_streets_id), None)
             self.street_map[street_id] = new_street
+            self.cross_streets_map[new_street.start_cross_id].add_street(street_id, Direction.START)
             print(f"Street {street_id} from {initial_cross_streets_id} to {final_point} added.")
         elif final_cross_streets_id:
             street = self.canvas.create_line(initial_point[0], initial_point[1], final_point[0], final_point[1],
@@ -138,6 +142,7 @@ class StreetSchemaEditor:
             self.canvas.tag_bind(street, "<Button-1>", self.start_drag)
             new_street = Street(street_id, None, int(final_cross_streets_id))
             self.street_map[street_id] = new_street
+            self.cross_streets_map[new_street.end_cross_id].add_street(street_id, Direction.END)
             print(f"Street {street_id} from {initial_point} to {final_cross_streets_id} added.")
         else:
             print("Error: No selected cross streets")
