@@ -1,11 +1,11 @@
-from model.street_crossing import StreetCrossing
 
 
 class Street:
 
-    def __init__(self):
-        self.start: StreetCrossing = None
-        self.end: StreetCrossing = None
+    def __init__(self, street_id: int, start_cross_id: int | None, end_cross_id: int | None):
+        self.id = street_id
+        self.start_cross_id: int | None = start_cross_id
+        self.end_cross_id: int | None = end_cross_id
         self.capacity: int = 0
 
     

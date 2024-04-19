@@ -1,8 +1,18 @@
+from tkinter import messagebox
+from typing import List
+from typing import Dict
+from model.cross_streets import CrossStreets
+from model.street import Street
 import tkinter as tk
 
 
 class StreetSchemaEditor:
     def __init__(self, window):
+        self.cross_streets_map: Dict[int, CrossStreets] = {}
+        self.street_map: Dict[int, Street] = {}
+
+        self.street_listbox = None  # Variable para almacenar la lista de calles
+
         self.window = window
         self.window.title("Add street schema")
         self.window.geometry("1200x600")  # Tamaño de la ventana
@@ -83,7 +93,9 @@ class StreetSchemaEditor:
         cross_streets = self.canvas.create_oval(event.x - 25, event.y - 25, event.x + 25, event.y + 25, fill="blue")
         id_text = self.canvas.create_text(event.x, event.y, text=str(self.id_cross_streets), fill="white")
         self.canvas.itemconfig(cross_streets, tags=("cross_streets", f"{self.id_cross_streets}", id_text))
-        print(f"Cross streets {self.id_cross_streets} added.")
+        cross = CrossStreets(self.id_cross_streets)
+        self.cross_streets_map[self.id_cross_streets] = cross
+        print(f"Cross streets {cross.id} added.")
         self.id_cross_streets += 1
 
     def add_street_event(self, initial_point, final_point, street_id):
@@ -103,6 +115,8 @@ class StreetSchemaEditor:
             self.canvas.create_text((initial_point[0] + final_point[0]) / 2,
                                     (initial_point[1] + final_point[1]) / 2 - 10, text=str(street_id), fill="white")
             self.canvas.tag_bind(street, "<Button-1>", self.start_drag)
+            new_street = Street(street_id, int(initial_cross_streets_id), int(final_cross_streets_id))
+            self.street_map[street_id] = new_street
             print(f"Street {street_id} from {initial_cross_streets_id} to {final_cross_streets_id} added.")
         elif initial_cross_streets_id:
             street = self.canvas.create_line(initial_point[0], initial_point[1], final_point[0], final_point[1],
@@ -110,6 +124,8 @@ class StreetSchemaEditor:
             self.canvas.create_text((initial_point[0] + final_point[0]) / 2,
                                     (initial_point[1] + final_point[1]) / 2 - 10, text=str(street_id), fill="white")
             self.canvas.tag_bind(street, "<Button-1>", self.start_drag)
+            new_street = Street(street_id, int(initial_cross_streets_id), None)
+            self.street_map[street_id] = new_street
             print(f"Street {street_id} from {initial_cross_streets_id} to {final_point} added.")
         elif final_cross_streets_id:
             street = self.canvas.create_line(initial_point[0], initial_point[1], final_point[0], final_point[1],
@@ -117,6 +133,8 @@ class StreetSchemaEditor:
             self.canvas.create_text((initial_point[0] + final_point[0]) / 2,
                                     (initial_point[1] + final_point[1]) / 2 - 10, text=str(street_id), fill="white")
             self.canvas.tag_bind(street, "<Button-1>", self.start_drag)
+            new_street = Street(street_id, None, int(final_cross_streets_id))
+            self.street_map[street_id] = new_street
             print(f"Street {street_id} from {initial_point} to {final_cross_streets_id} added.")
         else:
             print("Error: No selected cross streets")
