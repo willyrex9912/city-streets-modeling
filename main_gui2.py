@@ -151,11 +151,15 @@ class StreetSchemaEditor:
                 if new_capacity.isdigit():
                     self.street_map[selected_street_id].capacity = int(new_capacity)
                     capacity_value.set(f"Current Capacity: {self.street_map[selected_street_id].capacity}")
-                    messagebox.showinfo("Success", f"Capacity for Street {selected_street_id} updated.")
+                    capacity_entry.delete(0, tk.END)  # Borrar el contenido de la caja de texto
+                    messagebox.showinfo("Success", f"Capacity for Street {selected_street_id} updated.",
+                                        parent=configure_window)  # Mostrar mensaje en la ventana principal
                 else:
-                    messagebox.showwarning("Warning", "Invalid capacity value. Please enter a valid integer.")
+                    messagebox.showwarning("Warning", "Invalid capacity value. Please enter a valid integer.",
+                                           parent=configure_window)  # Mostrar mensaje en la ventana principal
             else:
-                messagebox.showwarning("Warning", "Please select a street to configure.")
+                messagebox.showwarning("Warning", "Please select a street to configure.",
+                                       parent=configure_window)  # Mostrar mensaje en la ventana principal
 
         configure_window = tk.Toplevel(self.window)
         configure_window.title("Configure Streets")
