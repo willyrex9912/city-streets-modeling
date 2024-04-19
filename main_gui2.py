@@ -6,6 +6,14 @@ from enums.direction import Direction
 import tkinter as tk
 
 
+class StreetData:
+    def __init__(self, street_id: int, direction: Direction):
+        self.street_id = street_id
+        self.direction = direction
+        self.min = None
+        self.max = None
+
+
 class StreetSchemaEditor:
     def __init__(self, window):
         self.cross_streets_map: Dict[int, CrossStreets] = {}
@@ -38,13 +46,17 @@ class StreetSchemaEditor:
         self.btn_configure_streets = tk.Button(self.window, text="Configure streets", command=self.configure_streets)
         self.btn_configure_streets.grid(row=0, column=2, padx=5, pady=5)
 
+        # Botón para configurar datos de calles
+        self.btn_configure_streets_data = tk.Button(self.window, text="Configure streets data", command=self.configure_streets_data)
+        self.btn_configure_streets_data.grid(row=0, column=3, padx=5, pady=5)
+
         # Lienzo con fondo negro
         self.canvas = tk.Canvas(self.window, width=1200, height=600, bg="black")
-        self.canvas.grid(row=1, column=0, columnspan=3)
+        self.canvas.grid(row=1, column=0, columnspan=4)
 
         # Botón para salir
         self.btn_exit = tk.Button(self.window, text="Exit", command=self.window.quit)
-        self.btn_exit.grid(row=2, column=0, columnspan=3, pady=10)
+        self.btn_exit.grid(row=2, column=0, columnspan=4, pady=10)
 
     def start_drag(self, event):
         self.last_x = event.x
@@ -198,6 +210,88 @@ class StreetSchemaEditor:
 
         save_button = tk.Button(configure_window, text="Save Changes", command=update_capacity)
         save_button.pack()
+
+    def configure_streets_data(self):
+        def update_min_max():
+            selected_street_data_index = street_data_listbox.curselection()
+            if selected_street_data_index:
+                selected_street_data_id = int(selected_street_data_index[0]) + 1
+                new_min = min_entry.get()
+                new_max = max_entry.get()
+                if new_min.isdigit() and new_max.isdigit():
+                    selected_street_data = self.get_selected_street_data(selected_street_data_id)
+                    selected_street_data.min_percentage = int(new_min)
+                    selected_street_data.max_percentage = int(new_max)
+                    min_value.set(f"Min: {selected_street_data.min_percentage}")
+                    max_value.set(f"Max: {selected_street_data.max_percentage}")
+                    min_entry.delete(0, tk.END)
+                    max_entry.delete(0, tk.END)
+                    messagebox.showinfo("Success", f"Min and Max values for StreetData {selected_street_data_id} updated.",
+                                        parent=configure_window)
+                else:
+                    messagebox.showwarning("Warning", "Invalid min or max value. Please enter valid integers.",
+                                           parent=configure_window)
+            else:
+                messagebox.showwarning("Warning", "Please select a StreetData to configure.",
+                                       parent=configure_window)
+
+        def show_min_max(event):
+            selected_street_data_index = street_data_listbox.curselection()
+            if selected_street_data_index:
+                selected_street_data_id = int(selected_street_data_index[0]) + 1
+                print("Selected street data id -> " + str(selected_street_data_id))
+                street_data_selected = self.get_selected_street_data(selected_street_data_id)
+                print(street_data_selected)
+                min_value.set(f"Min: {street_data_selected.min_percentage}")
+                max_value.set(f"Max: {street_data_selected.max_percentage}")
+
+        configure_window = tk.Toplevel(self.window)
+        configure_window.title("Configure Streets Data")
+        configure_window.geometry("300x400")
+
+        street_data_list_label = tk.Label(configure_window, text="Street Data List")
+        street_data_list_label.pack()
+
+        street_data_listbox = tk.Listbox(configure_window)
+        for cross_streets in self.cross_streets_map.values():
+            for street_data_id, street_data in cross_streets.street_map.items():
+                street_data_listbox.insert(tk.END, f"Street {street_data_id} on {cross_streets.id}")
+        street_data_listbox.pack()
+
+        min_value = tk.StringVar()
+        min_label = tk.Label(configure_window, textvariable=min_value)
+        min_label.pack()
+
+        max_value = tk.StringVar()
+        max_label = tk.Label(configure_window, textvariable=max_value)
+        max_label.pack()
+
+        def get_selected_street_data(street_data_id):
+            for cross_streets in self.cross_streets_map.values():
+                if street_data_id in cross_streets.street_map:
+                    return cross_streets.street_map[street_data_id]
+
+        street_data_listbox.bind("<<ListboxSelect>>", show_min_max)
+
+        min_entry_label = tk.Label(configure_window, text="New Min")
+        min_entry_label.pack()
+
+        min_entry = tk.Entry(configure_window)
+        min_entry.pack()
+
+        max_entry_label = tk.Label(configure_window, text="New Max")
+        max_entry_label.pack()
+
+        max_entry = tk.Entry(configure_window)
+        max_entry.pack()
+
+        save_button = tk.Button(configure_window, text="Save Changes", command=update_min_max)
+        save_button.pack()
+
+    def get_selected_street_data(self, street_data_id):
+        for cross_streets in self.cross_streets_map.values():
+            if street_data_id in cross_streets.street_map:
+                return cross_streets.street_map[street_data_id]
 
 
 def main():
