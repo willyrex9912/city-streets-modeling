@@ -1,5 +1,4 @@
-from tkinter import messagebox
-from typing import List
+from tkinter import messagebox, simpledialog
 from typing import Dict
 from model.cross_streets import CrossStreets
 from model.street import Street
@@ -34,13 +33,17 @@ class StreetSchemaEditor:
         self.btn_street = tk.Button(self.window, text="Add street", command=self.add_street)
         self.btn_street.grid(row=0, column=1, padx=5, pady=5)
 
+        # Botón para configurar calles
+        self.btn_configure_streets = tk.Button(self.window, text="Configure streets", command=self.configure_streets)
+        self.btn_configure_streets.grid(row=0, column=2, padx=5, pady=5)
+
         # Lienzo con fondo negro
         self.canvas = tk.Canvas(self.window, width=1200, height=600, bg="black")
-        self.canvas.grid(row=1, column=0, columnspan=2)
+        self.canvas.grid(row=1, column=0, columnspan=3)
 
         # Botón para salir
         self.btn_exit = tk.Button(self.window, text="Exit", command=self.window.quit)
-        self.btn_exit.grid(row=2, column=0, columnspan=2, pady=10)
+        self.btn_exit.grid(row=2, column=0, columnspan=3, pady=10)
 
     def start_drag(self, event):
         self.last_x = event.x
@@ -138,6 +141,54 @@ class StreetSchemaEditor:
             print(f"Street {street_id} from {initial_point} to {final_cross_streets_id} added.")
         else:
             print("Error: No selected cross streets")
+
+    def configure_streets(self):
+        def update_capacity():
+            selected_street_index = street_listbox.curselection()
+            if selected_street_index:
+                selected_street_id = int(selected_street_index[0]) + 1
+                new_capacity = capacity_entry.get()
+                if new_capacity.isdigit():
+                    self.street_map[selected_street_id].capacity = int(new_capacity)
+                    capacity_value.set(f"Current Capacity: {self.street_map[selected_street_id].capacity}")
+                    messagebox.showinfo("Success", f"Capacity for Street {selected_street_id} updated.")
+                else:
+                    messagebox.showwarning("Warning", "Invalid capacity value. Please enter a valid integer.")
+            else:
+                messagebox.showwarning("Warning", "Please select a street to configure.")
+
+        configure_window = tk.Toplevel(self.window)
+        configure_window.title("Configure Streets")
+        configure_window.geometry("300x300")
+
+        street_list_label = tk.Label(configure_window, text="Street List")
+        street_list_label.pack()
+
+        street_listbox = tk.Listbox(configure_window)
+        for street_id, street in self.street_map.items():
+            street_listbox.insert(tk.END, f"Street {street_id}")
+        street_listbox.pack()
+
+        capacity_value = tk.StringVar()
+        capacity_label = tk.Label(configure_window, textvariable=capacity_value)
+        capacity_label.pack()
+
+        def show_capacity(event):
+            selected_street_index = street_listbox.curselection()
+            if selected_street_index:
+                selected_street_id = int(selected_street_index[0]) + 1
+                capacity_value.set(f"Current Capacity: {self.street_map[selected_street_id].capacity}")
+
+        street_listbox.bind("<<ListboxSelect>>", show_capacity)
+
+        capacity_entry_label = tk.Label(configure_window, text="New Capacity")
+        capacity_entry_label.pack()
+
+        capacity_entry = tk.Entry(configure_window)
+        capacity_entry.pack()
+
+        save_button = tk.Button(configure_window, text="Save Changes", command=update_capacity)
+        save_button.pack()
 
 
 def main():
