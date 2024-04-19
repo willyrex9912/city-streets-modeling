@@ -32,6 +32,8 @@ class StreetSchemaEditor:
         self.id_cross_streets = 1
         self.id_street = 1
 
+        self.street_data_index_map = {}
+
         self.create_widgets()
 
     def create_widgets(self):
@@ -239,9 +241,7 @@ class StreetSchemaEditor:
             selected_street_data_index = street_data_listbox.curselection()
             if selected_street_data_index:
                 selected_street_data_id = int(selected_street_data_index[0]) + 1
-                print("Selected street data id -> " + str(selected_street_data_id))
                 street_data_selected = self.get_selected_street_data(selected_street_data_id)
-                print(street_data_selected)
                 min_value.set(f"Min: {street_data_selected.min_percentage}")
                 max_value.set(f"Max: {street_data_selected.max_percentage}")
 
@@ -256,6 +256,8 @@ class StreetSchemaEditor:
         for cross_streets in self.cross_streets_map.values():
             for street_data_id, street_data in cross_streets.street_map.items():
                 street_data_listbox.insert(tk.END, f"Street {street_data_id} on {cross_streets.id}")
+                index = street_data_listbox.size()
+                self.street_data_index_map[index] = [street_data_id, cross_streets.id]
         street_data_listbox.pack()
 
         min_value = tk.StringVar()
@@ -288,10 +290,10 @@ class StreetSchemaEditor:
         save_button = tk.Button(configure_window, text="Save Changes", command=update_min_max)
         save_button.pack()
 
-    def get_selected_street_data(self, street_data_id):
-        for cross_streets in self.cross_streets_map.values():
-            if street_data_id in cross_streets.street_map:
-                return cross_streets.street_map[street_data_id]
+    def get_selected_street_data(self, index):
+        street_id = self.street_data_index_map[index][0]
+        cross_id = self.street_data_index_map[index][1]
+        return self.cross_streets_map[cross_id].street_map[street_id]
 
 
 def main():
