@@ -8,3 +8,4 @@ class StreetData:
         self.direction = direction
         self.min_percentage = 0
         self.max_percentage = 100
+        self.percentage = None

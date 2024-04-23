@@ -3,6 +3,7 @@ from typing import Dict
 from model.cross_streets import CrossStreets
 from model.street import Street
 from enums.direction import Direction
+from ga.util.individual_generator import IndividualGenerator
 import tkinter as tk
 
 
@@ -52,13 +53,18 @@ class StreetSchemaEditor:
         self.btn_configure_streets_data = tk.Button(self.window, text="Configure streets data", command=self.configure_streets_data)
         self.btn_configure_streets_data.grid(row=0, column=3, padx=5, pady=5)
 
+        # Botón para configurar datos de calles
+        self.btn_configure_streets_data = tk.Button(self.window, text="Generate solution",
+                                                    command=self.generate_solution)
+        self.btn_configure_streets_data.grid(row=0, column=4, padx=5, pady=5)
+
         # Lienzo con fondo negro
         self.canvas = tk.Canvas(self.window, width=1200, height=600, bg="black")
-        self.canvas.grid(row=1, column=0, columnspan=4)
+        self.canvas.grid(row=1, column=0, columnspan=5)
 
         # Botón para salir
         self.btn_exit = tk.Button(self.window, text="Exit", command=self.window.quit)
-        self.btn_exit.grid(row=2, column=0, columnspan=4, pady=10)
+        self.btn_exit.grid(row=2, column=0, columnspan=5, pady=10)
 
     def start_drag(self, event):
         self.last_x = event.x
@@ -228,7 +234,8 @@ class StreetSchemaEditor:
                     max_value.set(f"Max: {selected_street_data.max_percentage}")
                     min_entry.delete(0, tk.END)
                     max_entry.delete(0, tk.END)
-                    messagebox.showinfo("Success", f"Min and Max values for StreetData {selected_street_data_id} updated.",
+                    data = self.street_data_index_map[selected_street_data_id]
+                    messagebox.showinfo("Success", f"Min and Max values for Street {data[0]} on Cross {data[1]} updated.",
                                         parent=configure_window)
                 else:
                     messagebox.showwarning("Warning", "Invalid min or max value. Please enter valid integers.",
@@ -295,6 +302,9 @@ class StreetSchemaEditor:
         cross_id = self.street_data_index_map[index][1]
         return self.cross_streets_map[cross_id].street_map[street_id]
 
+    def generate_solution(self):
+        individual_generator = IndividualGenerator(self.cross_streets_map)
+        individual_generator.generate_individual()
 
 def main():
     window = tk.Tk()
