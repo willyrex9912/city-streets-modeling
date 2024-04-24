@@ -3,7 +3,7 @@ from typing import Dict
 from model.cross_streets import CrossStreets
 from model.street import Street
 from enums.direction import Direction
-from ga.util.individual_generator import IndividualGenerator
+from ga.util.population_generator import PopulationGenerator
 import tkinter as tk
 
 
@@ -303,8 +303,9 @@ class StreetSchemaEditor:
         return self.cross_streets_map[cross_id].street_map[street_id]
 
     def generate_solution(self):
-        individual_generator = IndividualGenerator(self.cross_streets_map)
-        individual_generator.generate_individual()
+        population_generator = PopulationGenerator(self.street_map)
+        population_generator.generate_population(6)
+
 
 def main():
     window = tk.Tk()
