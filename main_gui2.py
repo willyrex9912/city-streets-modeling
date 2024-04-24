@@ -35,36 +35,40 @@ class StreetSchemaEditor:
 
         self.street_data_index_map = {}
 
+        self.population_size = 10
+        self.mutation_size = 1
+        self.mutation_generations = 1
+
         self.create_widgets()
 
     def create_widgets(self):
-        # Botones para cambiar entre círculos y flechas
         self.btn_cross_streets = tk.Button(self.window, text="Add cross streets", command=self.add_cross_streets)
         self.btn_cross_streets.grid(row=0, column=0, padx=5, pady=5)
 
         self.btn_street = tk.Button(self.window, text="Add street", command=self.add_street)
         self.btn_street.grid(row=0, column=1, padx=5, pady=5)
 
-        # Botón para configurar calles
         self.btn_configure_streets = tk.Button(self.window, text="Configure streets", command=self.configure_streets)
         self.btn_configure_streets.grid(row=0, column=2, padx=5, pady=5)
 
-        # Botón para configurar datos de calles
         self.btn_configure_streets_data = tk.Button(self.window, text="Configure streets data", command=self.configure_streets_data)
         self.btn_configure_streets_data.grid(row=0, column=3, padx=5, pady=5)
 
-        # Botón para configurar datos de calles
-        self.btn_configure_streets_data = tk.Button(self.window, text="Generate solution",
-                                                    command=self.generate_solution)
-        self.btn_configure_streets_data.grid(row=0, column=4, padx=5, pady=5)
+        self.btn_configure_population = tk.Button(self.window, text="Population", command=self.configure_population)
+        self.btn_configure_population.grid(row=0, column=4, padx=5, pady=5)
+
+        self.btn_configure_mutation = tk.Button(self.window, text="Mutation", command=self.configure_mutation_rate)
+        self.btn_configure_mutation.grid(row=0, column=5, padx=5, pady=5)
+
+        self.btn_configure_streets_data = tk.Button(self.window, text="Generate solution", command=self.generate_solution)
+        self.btn_configure_streets_data.grid(row=0, column=6, padx=5, pady=5)
 
         # Lienzo con fondo negro
         self.canvas = tk.Canvas(self.window, width=1200, height=600, bg="black")
-        self.canvas.grid(row=1, column=0, columnspan=5)
+        self.canvas.grid(row=1, column=0, columnspan=7)
 
-        # Botón para salir
         self.btn_exit = tk.Button(self.window, text="Exit", command=self.window.quit)
-        self.btn_exit.grid(row=2, column=0, columnspan=5, pady=10)
+        self.btn_exit.grid(row=2, column=0, columnspan=7, pady=10)
 
     def start_drag(self, event):
         self.last_x = event.x
@@ -297,6 +301,70 @@ class StreetSchemaEditor:
         save_button = tk.Button(configure_window, text="Save Changes", command=update_min_max)
         save_button.pack()
 
+    def configure_population(self):
+        def update_population_size():
+            new_population_size = population_entry.get()
+            if new_population_size.isdigit():
+                self.population_size = int(new_population_size)
+                population_value.set(f"Population Size: {self.population_size}")
+                population_entry.delete(0, tk.END)  # Limpiar el Entry
+                messagebox.showinfo("Success", f"Population size updated to {self.population_size}.",
+                                    parent=configure_window)
+            else:
+                messagebox.showwarning("Warning", "Invalid population size. Please enter a valid integer.",
+                                       parent=configure_window)
+
+        configure_window = tk.Toplevel(self.window)
+        configure_window.title("Configure Parameters")
+        configure_window.geometry("200x200")
+        population_label = tk.Label(configure_window, text="Population Size")
+        population_label.pack()
+        population_value = tk.StringVar()
+        population_value.set(f"Population Size: {self.population_size}")
+        population_label = tk.Label(configure_window, textvariable=population_value)
+        population_label.pack()
+        population_entry = tk.Entry(configure_window)
+        population_entry.pack()
+        save_button = tk.Button(configure_window, text="Save Changes", command=update_population_size)
+        save_button.pack()
+
+    def configure_mutation_rate(self):
+        def update_mutation_rate():
+            new_mutation_size = mutation_size_entry.get()
+            new_generations_size = mutation_generations_entry.get()
+            if new_mutation_size.isdigit() and new_generations_size.isdigit():
+                self.mutation_size = int(new_mutation_size)
+                self.mutation_generations = int(new_generations_size)
+                mutation_rate_value.set(f"{self.mutation_size} mutations for every {self.mutation_generations} generations.")
+                mutation_size_entry.delete(0, tk.END)
+                mutation_generations_entry.delete(0, tk.END)
+                messagebox.showinfo("Success", f"Mutation rate updated.", parent=configure_window)
+            else:
+                messagebox.showwarning("Warning", "Invalid data. Please enter a valid integer.",
+                                       parent=configure_window)
+
+        configure_window = tk.Toplevel(self.window)
+        configure_window.title("Configure mutation")
+        configure_window.geometry("300x200")
+        mutation_rate_label = tk.Label(configure_window, text="Mutation rate:")
+        mutation_rate_label.pack()
+        mutation_rate_value = tk.StringVar()
+        mutation_rate_value.set(f"{self.mutation_size} mutations for every {self.mutation_generations} generations.")
+        mutation_rate_label = tk.Label(configure_window, textvariable=mutation_rate_value)
+        mutation_rate_label.pack()
+        info_label = tk.Label(configure_window, text="Enter new values:")
+        info_label.pack()
+        size_label = tk.Label(configure_window, text="Mutations")
+        size_label.pack()
+        mutation_size_entry = tk.Entry(configure_window)
+        mutation_size_entry.pack()
+        generations_label = tk.Label(configure_window, text="Generations")
+        generations_label.pack()
+        mutation_generations_entry = tk.Entry(configure_window)
+        mutation_generations_entry.pack()
+        save_button = tk.Button(configure_window, text="Save Changes", command=update_mutation_rate)
+        save_button.pack()
+
     def get_selected_street_data(self, index):
         street_id = self.street_data_index_map[index][0]
         cross_id = self.street_data_index_map[index][1]
@@ -304,7 +372,7 @@ class StreetSchemaEditor:
 
     def generate_solution(self):
         population_generator = PopulationGenerator(self.street_map)
-        population_generator.generate_population(6)
+        population_generator.generate_population(self.population_size)
 
 
 def main():
