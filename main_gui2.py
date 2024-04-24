@@ -41,6 +41,7 @@ class StreetSchemaEditor:
         self.mutation_generations = 1
 
         self.termination_criteria = TerminationCriteria.GENERATION_NUMBER
+        self.termination_value = 100
 
         self.create_widgets()
 
@@ -372,10 +373,6 @@ class StreetSchemaEditor:
         save_button.pack()
 
     def configure_termination_criteria(self):
-        def update_termination_criteria():
-            self.termination_criteria = selected_criteria.get()
-            configure_window.destroy()
-
         configure_window = tk.Toplevel(self.window)
         configure_window.title("Configure Termination Criteria")
 
@@ -385,13 +382,26 @@ class StreetSchemaEditor:
         criteria_frame = tk.Frame(configure_window)
         criteria_frame.pack(padx=10, pady=10)
 
-        # Agrega los radio botones para cada opción de criterio de terminación
         tk.Radiobutton(criteria_frame, text="Generation Number", variable=selected_criteria,
-                        value=TerminationCriteria.GENERATION_NUMBER, command=update_termination_criteria).pack(
-            anchor='w')
+                       value=TerminationCriteria.GENERATION_NUMBER).pack(anchor='w')
         tk.Radiobutton(criteria_frame, text="Efficiency Percentage", variable=selected_criteria,
-                        value=TerminationCriteria.EFFICIENCY_PERCENTAGE, command=update_termination_criteria).pack(
-            anchor='w')
+                       value=TerminationCriteria.EFFICIENCY_PERCENTAGE).pack(anchor='w')
+
+        value_label = tk.Label(configure_window, text="Value:")
+        value_label.pack()
+        value_entry = tk.Entry(configure_window)
+        value_entry.pack()
+
+        if self.termination_value:
+            value_entry.insert(tk.END, str(self.termination_value))
+
+        def save_value():
+            self.termination_criteria = selected_criteria.get()
+            self.termination_value = value_entry.get()
+            configure_window.destroy()
+
+        save_button = tk.Button(configure_window, text="Save", command=save_value)
+        save_button.pack()
 
     def get_selected_street_data(self, index):
         street_id = self.street_data_index_map[index][0]
