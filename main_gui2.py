@@ -3,6 +3,7 @@ from typing import Dict
 from model.cross_streets import CrossStreets
 from model.street import Street
 from enums.direction import Direction
+from ga.enums.termination_criteria import TerminationCriteria
 from ga.util.population_generator import PopulationGenerator
 import tkinter as tk
 
@@ -39,6 +40,8 @@ class StreetSchemaEditor:
         self.mutation_size = 1
         self.mutation_generations = 1
 
+        self.termination_criteria = TerminationCriteria.GENERATION_NUMBER
+
         self.create_widgets()
 
     def create_widgets(self):
@@ -60,15 +63,18 @@ class StreetSchemaEditor:
         self.btn_configure_mutation = tk.Button(self.window, text="Mutation", command=self.configure_mutation_rate)
         self.btn_configure_mutation.grid(row=0, column=5, padx=5, pady=5)
 
+        self.btn_termination_criteria = tk.Button(self.window, text="Termination Criteria", command=self.configure_termination_criteria)
+        self.btn_termination_criteria.grid(row=0, column=6, padx=5, pady=5)
+
         self.btn_configure_streets_data = tk.Button(self.window, text="Generate solution", command=self.generate_solution)
-        self.btn_configure_streets_data.grid(row=0, column=6, padx=5, pady=5)
+        self.btn_configure_streets_data.grid(row=0, column=7, padx=5, pady=5)
 
         # Lienzo con fondo negro
         self.canvas = tk.Canvas(self.window, width=1200, height=600, bg="black")
-        self.canvas.grid(row=1, column=0, columnspan=7)
+        self.canvas.grid(row=1, column=0, columnspan=8)
 
         self.btn_exit = tk.Button(self.window, text="Exit", command=self.window.quit)
-        self.btn_exit.grid(row=2, column=0, columnspan=7, pady=10)
+        self.btn_exit.grid(row=2, column=0, columnspan=8, pady=10)
 
     def start_drag(self, event):
         self.last_x = event.x
@@ -364,6 +370,28 @@ class StreetSchemaEditor:
         mutation_generations_entry.pack()
         save_button = tk.Button(configure_window, text="Save Changes", command=update_mutation_rate)
         save_button.pack()
+
+    def configure_termination_criteria(self):
+        def update_termination_criteria():
+            self.termination_criteria = selected_criteria.get()
+            configure_window.destroy()
+
+        configure_window = tk.Toplevel(self.window)
+        configure_window.title("Configure Termination Criteria")
+
+        selected_criteria = tk.StringVar()
+        selected_criteria.set(self.termination_criteria)
+
+        criteria_frame = tk.Frame(configure_window)
+        criteria_frame.pack(padx=10, pady=10)
+
+        # Agrega los radio botones para cada opción de criterio de terminación
+        tk.Radiobutton(criteria_frame, text="Generation Number", variable=selected_criteria,
+                        value=TerminationCriteria.GENERATION_NUMBER, command=update_termination_criteria).pack(
+            anchor='w')
+        tk.Radiobutton(criteria_frame, text="Efficiency Percentage", variable=selected_criteria,
+                        value=TerminationCriteria.EFFICIENCY_PERCENTAGE, command=update_termination_criteria).pack(
+            anchor='w')
 
     def get_selected_street_data(self, index):
         street_id = self.street_data_index_map[index][0]
