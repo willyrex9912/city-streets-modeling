@@ -4,7 +4,7 @@ from model.cross_streets import CrossStreets
 from model.street import Street
 from enums.direction import Direction
 from ga.enums.termination_criteria import TerminationCriteria
-from ga.util.population_generator import PopulationGenerator
+from ga.util.solution_generator import SolutionGenerator
 import tkinter as tk
 
 
@@ -409,8 +409,8 @@ class StreetSchemaEditor:
         return self.cross_streets_map[cross_id].street_map[street_id]
 
     def generate_solution(self):
-        population_generator = PopulationGenerator(self.street_map)
-        population_generator.generate_population(self.population_size)
+        solution_generator = SolutionGenerator(self.street_map, self.population_size, self.cross_streets_map)
+        solution_generator.start()
 
 
 def main():

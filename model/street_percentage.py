@@ -6,3 +6,5 @@ class StreetPercentage:
         self.street_id = street_id
         self.start_percentage: int = start_percentage
         self.end_percentage: int = end_percentage
+        self.start_number: int | None = None
+        self.end_number: int | None = None
