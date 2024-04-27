@@ -14,6 +14,8 @@ class SolutionGenerator:
         self.cross_streets_map = cross_streets_map
         self.street_map = street_map
         self.generations: int = 0
+        self.temp_total_inputs: int = 0
+        self.temp_total_outputs: int = 0
 
     def start(self):
         population = self.population_generator.generate_population(self.population_size)
@@ -28,6 +30,8 @@ class SolutionGenerator:
             print(individual)
             for gene in individual.genes.values():
                 print(vars(gene))
+            print("Total inputs: ", self.temp_total_inputs)
+            print("Total outputs: ", self.temp_total_outputs)
         return 1
 
     def calculate_all_cross_percentages(self, individual: Individual):
@@ -50,6 +54,7 @@ class SolutionGenerator:
                 gen = individual.genes[main_street.id]
                 gen.start_number = main_street.capacity
                 gen.end_number = main_street.capacity
+                self.temp_total_inputs += gen.end_number
                 end_number = gen.end_number
                 total_number += end_number * 1
             else:
@@ -67,4 +72,6 @@ class SolutionGenerator:
             main_street = self.street_map[street.street_id]
             gen = individual.genes[main_street.id]
             gen.start_number = round(total_number * (gen.start_percentage/100))
+            if main_street.end_cross_id is None:
+                self.temp_total_outputs += gen.start_number
         cross.evaluated = True
