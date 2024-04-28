@@ -63,15 +63,20 @@ class SolutionGenerator:
                 if start_number is None:
                     self.calculate_cross_percentages(main_street.start_cross_id, individual)
                     start_number = gen.start_number
-                    total_number += round(start_number * (gen.end_percentage/100))
-                    gen.end_number = total_number
+                max_number = round(main_street.capacity * (gen.end_percentage / 100))
+                if start_number <= max_number:
+                    gen.end_number = start_number
+                    total_number += start_number
                 else:
-                    total_number += round(start_number * (gen.end_percentage/100))
-                    gen.end_number = total_number
+                    gen.end_number = max_number
+                    total_number += max_number
         for street in output_streets:
             main_street = self.street_map[street.street_id]
             gen = individual.genes[main_street.id]
+            max_number = round(main_street.capacity * (gen.start_percentage / 100))
             gen.start_number = round(total_number * (gen.start_percentage/100))
+            if gen.start_number > max_number:
+                gen.start_number = max_number
             if main_street.end_cross_id is None:
                 self.temp_total_outputs += gen.start_number
         cross.evaluated = True
