@@ -8,14 +8,12 @@ from enums.direction import Direction
 
 class SolutionGenerator:
 
-    def __init__(self, street_map: Dict[int, Street], population_size:int, cross_streets_map: Dict[int, CrossStreets]):
+    def __init__(self, street_map: Dict[int, Street], population_size: int, cross_streets_map: Dict[int, CrossStreets]):
         self.population_generator = PopulationGenerator(street_map)
         self.population_size = population_size
         self.cross_streets_map = cross_streets_map
         self.street_map = street_map
         self.generations: int = 0
-        self.temp_total_inputs: int = 0
-        self.temp_total_outputs: int = 0
 
     def start(self):
         population = self.population_generator.generate_population(self.population_size)
@@ -23,15 +21,15 @@ class SolutionGenerator:
         self.aptitude_function(population)
 
     def aptitude_function(self, population: List[Individual]) -> int:
-        self.calculate_all_cross_percentages(population[0])
-        print("FINISHED")
+        for individual in population:
+            self.calculate_all_cross_percentages(individual)
+        print("FINISHED CALCULATIONS")
         for index, individual in enumerate(population):
             print(index+1)
             print(individual)
             for gene in individual.genes.values():
                 print(vars(gene))
-            print("Total inputs: ", self.temp_total_inputs)
-            print("Total outputs: ", self.temp_total_outputs)
+            individual.print_efficiency()
         return 1
 
     def calculate_all_cross_percentages(self, individual: Individual):
@@ -54,7 +52,7 @@ class SolutionGenerator:
                 gen = individual.genes[main_street.id]
                 gen.start_number = main_street.capacity
                 gen.end_number = main_street.capacity
-                self.temp_total_inputs += gen.end_number
+                individual.total_inputs += gen.end_number
                 end_number = gen.end_number
                 total_number += end_number * 1
             else:
@@ -78,5 +76,18 @@ class SolutionGenerator:
             if gen.start_number > max_number:
                 gen.start_number = max_number
             if main_street.end_cross_id is None:
-                self.temp_total_outputs += gen.start_number
+                individual.total_outputs += gen.start_number
         cross.evaluated = True
+        # Input percentage save to verify after
+        input_percentage = 0
+        for street in input_streets:
+            input_percentage += individual.genes[street.street_id].end_percentage
+        output_percentage = 0
+        for street in input_streets:
+            output_percentage += individual.genes[street.street_id].start_percentage
+        if input_percentage <= 100 and output_percentage <= 100:
+            individual.percentages_efficiency.append(100)
+        elif input_percentage <= 100 or output_percentage <= 100:
+            individual.percentages_efficiency.append(50)
+        else:
+            individual.percentages_efficiency.append(0)
