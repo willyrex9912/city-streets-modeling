@@ -11,6 +11,7 @@ class Individual:
         self.total_inputs: int = 0
         self.total_outputs: int = 0
         self.percentages_efficiency: List[int] = []
+        self.aptitude: int = 0
 
     def print_efficiency(self):
         print("Total inputs: ", self.total_inputs)
@@ -19,5 +20,5 @@ class Individual:
         print("Efficiency on input and outputs: " + str(output_percentage) + "%")
         average = statistics.mean(self.percentages_efficiency)
         print("Efficiency on percentages: " + str(average) + "%")
-        total_efficiency = (output_percentage + average) / 2
-        print("Total efficiency: " + str(total_efficiency) + "%")
+        self.aptitude = round((output_percentage + average) / 2)
+        print("Total efficiency: " + str(self.aptitude) + "%")

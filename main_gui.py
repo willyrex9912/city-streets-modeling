@@ -410,7 +410,7 @@ class StreetSchemaEditor:
 
     def generate_solution(self):
         solution_generator = SolutionGenerator(self.street_map, self.population_size, self.cross_streets_map)
-        solution_generator.start()
+        solution_generator.start(self.termination_criteria, self.termination_value)
 
 
 def main():

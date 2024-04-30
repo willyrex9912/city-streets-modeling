@@ -14,7 +14,7 @@ class PopulationGenerator:
     def generate_population(self, population_size: int) -> List[Individual]:
         for _ in range(population_size):
             self.generate_individual()
-        self.print_population()
+        # self.print_population()
         return self.population
 
     def generate_individual(self):

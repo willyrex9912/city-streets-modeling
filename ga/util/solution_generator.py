@@ -4,6 +4,9 @@ from ga.individual import Individual
 from model.cross_streets import CrossStreets
 from model.street import Street
 from enums.direction import Direction
+from ga.enums.termination_criteria import TerminationCriteria
+from random import randint
+import numpy as np
 
 
 class SolutionGenerator:
@@ -13,24 +16,36 @@ class SolutionGenerator:
         self.population_size = population_size
         self.cross_streets_map = cross_streets_map
         self.street_map = street_map
-        self.generations: int = 0
+        self.generation: int = 0
+        self.population: List[Individual] = []
 
-    def start(self):
-        population = self.population_generator.generate_population(self.population_size)
-        self.generations += 1
-        self.aptitude_function(population)
+    def start(self, termination_criteria: TerminationCriteria, termination_value: int):
+        self.population = self.population_generator.generate_population(self.population_size)
+        self.generation += 1
+        self.work_generation(self.population)
+        while self.evaluate_generation(termination_criteria, termination_value) is None:
+            self.work_generation(self.generate_population_by_roulette())
+            self.generation += 1
 
-    def aptitude_function(self, population: List[Individual]) -> int:
+    def evaluate_generation(self, criteria: TerminationCriteria, value: int) -> Individual | None:
+        for individual in self.population:
+            if criteria == TerminationCriteria.GENERATION_NUMBER:
+                if value == self.generation:
+                    return individual
+            elif criteria == TerminationCriteria.EFFICIENCY_PERCENTAGE:
+                if value == individual.aptitude:
+                    return individual
+        return None
+
+    def work_generation(self, population: List[Individual]):
         for individual in population:
             self.calculate_all_cross_percentages(individual)
-        print("FINISHED CALCULATIONS")
         for index, individual in enumerate(population):
             print(index+1)
             print(individual)
             for gene in individual.genes.values():
                 print(vars(gene))
             individual.print_efficiency()
-        return 1
 
     def calculate_all_cross_percentages(self, individual: Individual):
         for cross in self.cross_streets_map.values():
@@ -91,3 +106,36 @@ class SolutionGenerator:
             individual.percentages_efficiency.append(50)
         else:
             individual.percentages_efficiency.append(0)
+
+    def generate_population_by_roulette(self) -> List[Individual]:
+        population = []
+        while len(population) < self.population_size:
+            first = self.select_by_roulette()
+            second = self.select_by_roulette()
+            population.extend(self.cross_individuals(first, second))
+        self.population = population
+        return population
+
+    @staticmethod
+    def cross_individuals(first: Individual, second: Individual) -> List[Individual]:
+        keys = list(first.genes.keys())
+        middle = len(keys) // 2
+        new_1 = {key: first.genes[key] for key in keys[:middle]}
+        new_1.update({key: second.genes[key] for key in keys[middle:]})
+        new_2 = {key: second.genes[key] for key in keys[:middle]}
+        new_2.update({key: first.genes[key] for key in keys[middle:]})
+
+        new_individual_1 = Individual()
+        new_individual_1.genes = new_1
+        new_individual_2 = Individual()
+        new_individual_2.genes = new_2
+        return [new_individual_1, new_individual_2]
+
+    def select_by_roulette(self) -> Individual:
+        s = sum(individual.aptitude for individual in self.population)
+        a = randint(0, s)
+        value = 0
+        for individual in self.population:
+            value = value + individual.aptitude
+            if value >= a:
+                return individual
