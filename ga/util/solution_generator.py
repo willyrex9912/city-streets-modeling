@@ -6,7 +6,6 @@ from model.street import Street
 from enums.direction import Direction
 from ga.enums.termination_criteria import TerminationCriteria
 from random import randint
-import numpy as np
 
 
 class SolutionGenerator:
@@ -18,24 +17,35 @@ class SolutionGenerator:
         self.street_map = street_map
         self.generation: int = 0
         self.population: List[Individual] = []
+        self.best_individual: Individual | None = None
 
     def start(self, termination_criteria: TerminationCriteria, termination_value: int):
         self.population = self.population_generator.generate_population(self.population_size)
         self.generation += 1
+        print(f"Generation {self.generation}")
         self.work_generation(self.population)
-        while self.evaluate_generation(termination_criteria, termination_value) is None:
-            self.work_generation(self.generate_population_by_roulette())
+        while self.objetive_function(termination_criteria, termination_value) is False:
             self.generation += 1
+            print(f"Generation {self.generation}")
+            self.work_generation(self.generate_population_by_roulette())
+        print("BEST INDIVIDUAL FOUND:")
+        for gene in self.best_individual.genes.values():
+            print(vars(gene))
+        self.best_individual.print_efficiency()
 
-    def evaluate_generation(self, criteria: TerminationCriteria, value: int) -> Individual | None:
+    def objetive_function(self, criteria: TerminationCriteria, value: int) -> bool:
         for individual in self.population:
-            if criteria == TerminationCriteria.GENERATION_NUMBER:
-                if value == self.generation:
-                    return individual
-            elif criteria == TerminationCriteria.EFFICIENCY_PERCENTAGE:
-                if value == individual.aptitude:
-                    return individual
-        return None
+            if self.best_individual is None:
+                self.best_individual = individual
+            else:
+                if individual.aptitude > self.best_individual.aptitude:
+                    self.best_individual = individual
+        if criteria == TerminationCriteria.GENERATION_NUMBER:
+            return value == self.generation
+        elif criteria == TerminationCriteria.EFFICIENCY_PERCENTAGE:
+            if value <= self.best_individual.aptitude:
+                return True
+        return False
 
     def work_generation(self, population: List[Individual]):
         for individual in population:

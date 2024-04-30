@@ -377,15 +377,15 @@ class StreetSchemaEditor:
         configure_window.title("Configure Termination Criteria")
 
         selected_criteria = tk.StringVar()
-        selected_criteria.set(self.termination_criteria)
+        selected_criteria.set(self.termination_criteria.value)
 
         criteria_frame = tk.Frame(configure_window)
         criteria_frame.pack(padx=10, pady=10)
 
         tk.Radiobutton(criteria_frame, text="Generation Number", variable=selected_criteria,
-                       value=TerminationCriteria.GENERATION_NUMBER).pack(anchor='w')
+                       value=TerminationCriteria.GENERATION_NUMBER.value).pack(anchor='w')
         tk.Radiobutton(criteria_frame, text="Efficiency Percentage", variable=selected_criteria,
-                       value=TerminationCriteria.EFFICIENCY_PERCENTAGE).pack(anchor='w')
+                       value=TerminationCriteria.EFFICIENCY_PERCENTAGE.value).pack(anchor='w')
 
         value_label = tk.Label(configure_window, text="Value:")
         value_label.pack()
@@ -396,8 +396,8 @@ class StreetSchemaEditor:
             value_entry.insert(tk.END, str(self.termination_value))
 
         def save_value():
-            self.termination_criteria = selected_criteria.get()
-            self.termination_value = value_entry.get()
+            self.termination_criteria = TerminationCriteria(int(selected_criteria.get()))
+            self.termination_value = int(value_entry.get())
             configure_window.destroy()
 
         save_button = tk.Button(configure_window, text="Save", command=save_value)
