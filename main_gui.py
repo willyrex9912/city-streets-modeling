@@ -6,6 +6,7 @@ from enums.direction import Direction
 from ga.enums.termination_criteria import TerminationCriteria
 from ga.util.solution_generator import SolutionGenerator
 import tkinter as tk
+from tkinter import filedialog
 import pickle
 
 
@@ -37,6 +38,8 @@ class StreetSchemaEditor:
         self.termination_criteria = TerminationCriteria.GENERATION_NUMBER
         self.termination_value = 100
 
+        self.file_path = ""
+
         self.create_widgets()
 
     def create_widgets(self):
@@ -49,7 +52,8 @@ class StreetSchemaEditor:
         self.btn_configure_streets = tk.Button(self.window, text="Configure streets", command=self.configure_streets)
         self.btn_configure_streets.grid(row=0, column=2, padx=5, pady=5)
 
-        self.btn_configure_streets_data = tk.Button(self.window, text="Configure streets data", command=self.configure_streets_data)
+        self.btn_configure_streets_data = tk.Button(self.window, text="Configure streets data",
+                                                    command=self.configure_streets_data)
         self.btn_configure_streets_data.grid(row=0, column=3, padx=5, pady=5)
 
         self.btn_configure_population = tk.Button(self.window, text="Population", command=self.configure_population)
@@ -58,17 +62,19 @@ class StreetSchemaEditor:
         self.btn_configure_mutation = tk.Button(self.window, text="Mutation", command=self.configure_mutation_rate)
         self.btn_configure_mutation.grid(row=0, column=5, padx=5, pady=5)
 
-        self.btn_termination_criteria = tk.Button(self.window, text="Termination Criteria", command=self.configure_termination_criteria)
+        self.btn_termination_criteria = tk.Button(self.window, text="Termination Criteria",
+                                                  command=self.configure_termination_criteria)
         self.btn_termination_criteria.grid(row=0, column=6, padx=5, pady=5)
 
-        self.btn_configure_streets_data = tk.Button(self.window, text="Generate solution", command=self.generate_solution)
+        self.btn_configure_streets_data = tk.Button(self.window, text="Generate solution",
+                                                    command=self.generate_solution)
         self.btn_configure_streets_data.grid(row=0, column=7, padx=5, pady=5)
 
         self.btn_save_data = tk.Button(self.window, text="Save", command=self.save)
         self.btn_save_data.grid(row=0, column=8, padx=5, pady=5)
 
-        self.btn_save_data = tk.Button(self.window, text="Load", command=self.load)
-        self.btn_save_data.grid(row=0, column=9, padx=5, pady=5)
+        self.btn_load_data = tk.Button(self.window, text="Load", command=self.load)
+        self.btn_load_data.grid(row=0, column=9, padx=5, pady=5)
 
         # Lienzo con fondo negro
         self.canvas = tk.Canvas(self.window, width=1200, height=600, bg="black")
@@ -249,7 +255,8 @@ class StreetSchemaEditor:
                     min_entry.delete(0, tk.END)
                     max_entry.delete(0, tk.END)
                     data = self.street_data_index_map[selected_street_data_id]
-                    messagebox.showinfo("Success", f"Min and Max values for Street {data[0]} on Cross {data[1]} updated.",
+                    messagebox.showinfo("Success",
+                                        f"Min and Max values for Street {data[0]} on Cross {data[1]} updated.",
                                         parent=configure_window)
                 else:
                     messagebox.showwarning("Warning", "Invalid min or max value. Please enter valid integers.",
@@ -345,7 +352,8 @@ class StreetSchemaEditor:
             if new_mutation_size.isdigit() and new_generations_size.isdigit():
                 self.mutation_size = int(new_mutation_size)
                 self.mutation_generations = int(new_generations_size)
-                mutation_rate_value.set(f"{self.mutation_size} mutations for every {self.mutation_generations} generations.")
+                mutation_rate_value.set(
+                    f"{self.mutation_size} mutations for every {self.mutation_generations} generations.")
                 mutation_size_entry.delete(0, tk.END)
                 mutation_generations_entry.delete(0, tk.END)
                 messagebox.showinfo("Success", f"Mutation rate updated.", parent=configure_window)
@@ -418,22 +426,28 @@ class StreetSchemaEditor:
         solution_generator.start()
 
     def save(self):
-        app_state = {
-            'cross_streets_map': self.cross_streets_map,
-            'street_map': self.street_map,
-            'street_listbox': self.street_listbox,
-            'id_cross_streets': self.id_cross_streets,
-            'id_street': self.id_street,
-            'street_data_index_map': self.street_data_index_map,
-            'population_size': self.population_size,
-            'mutation_size': self.mutation_size,
-            'mutation_generations': self.mutation_generations,
-            'termination_criteria': self.termination_criteria,
-            'termination_value': self.termination_value,
-            'canvas_elements': self.get_canvas_elements()
-        }
-        with open('data/project/project.csm', 'wb') as file:
-            pickle.dump(app_state, file)
+        if not self.file_path:
+            self.file_path = filedialog.asksaveasfilename(defaultextension=".csm",
+                                                          filetypes=[("Modeling files", "*.csm"), ("All files", "*.*")])
+        if self.file_path:
+            app_state = {
+                'cross_streets_map': self.cross_streets_map,
+                'street_map': self.street_map,
+                'street_listbox': self.street_listbox,
+                'id_cross_streets': self.id_cross_streets,
+                'id_street': self.id_street,
+                'street_data_index_map': self.street_data_index_map,
+                'population_size': self.population_size,
+                'mutation_size': self.mutation_size,
+                'mutation_generations': self.mutation_generations,
+                'termination_criteria': self.termination_criteria,
+                'termination_value': self.termination_value,
+                'file_path': self.file_path,
+                'canvas_elements': self.get_canvas_elements()
+            }
+            with open(self.file_path, 'wb') as file:
+                pickle.dump(app_state, file)
+            messagebox.showinfo("Success", f"File saved on {self.file_path}.")
 
     def get_canvas_elements(self):
         canvas_elements = {
@@ -453,20 +467,24 @@ class StreetSchemaEditor:
         return canvas_elements
 
     def load(self):
-        with open('data/project/project.csm', 'rb') as file:
-            app_state = pickle.load(file)
-        self.cross_streets_map = app_state['cross_streets_map']
-        self.street_map = app_state['street_map']
-        self.street_listbox = app_state['street_listbox']
-        self.id_cross_streets = app_state['id_cross_streets']
-        self.id_street = app_state['id_street']
-        self.street_data_index_map = app_state['street_data_index_map']
-        self.population_size = app_state['population_size']
-        self.mutation_size = app_state['mutation_size']
-        self.mutation_generations = app_state['mutation_generations']
-        self.termination_criteria = app_state['termination_criteria']
-        self.termination_value = app_state['termination_value']
-        self.restore_canvas_elements(app_state['canvas_elements'])
+        new_file_path = filedialog.askopenfilename(filetypes=[("Modeling files", "*.csm"), ("All files", "*.*")])
+        if new_file_path:
+            self.file_path = new_file_path
+            with open(self.file_path, 'rb') as file:
+                app_state = pickle.load(file)
+            self.cross_streets_map = app_state['cross_streets_map']
+            self.street_map = app_state['street_map']
+            self.street_listbox = app_state['street_listbox']
+            self.id_cross_streets = app_state['id_cross_streets']
+            self.id_street = app_state['id_street']
+            self.street_data_index_map = app_state['street_data_index_map']
+            self.population_size = app_state['population_size']
+            self.mutation_size = app_state['mutation_size']
+            self.mutation_generations = app_state['mutation_generations']
+            self.termination_criteria = app_state['termination_criteria']
+            self.termination_value = app_state['termination_value']
+            self.file_path = app_state['file_path']
+            self.restore_canvas_elements(app_state['canvas_elements'])
 
     def restore_canvas_elements(self, canvas_elements):
         for id_text, coords in canvas_elements['crosses']:
