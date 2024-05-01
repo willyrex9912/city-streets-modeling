@@ -5,6 +5,7 @@ from model.cross_streets import CrossStreets
 from model.street import Street
 from enums.direction import Direction
 from ga.enums.termination_criteria import TerminationCriteria
+from util.grapher import Grapher
 import random
 
 
@@ -36,6 +37,7 @@ class SolutionGenerator:
             self.work_generation(self.generate_population_by_roulette())
         print("BEST INDIVIDUAL FOUND:")
         self.best_individual.print_efficiency()
+        Grapher.graph(self.cross_streets_map, self.street_map, self.best_individual)
 
     def objetive_function(self) -> bool:
         for individual in self.population:
