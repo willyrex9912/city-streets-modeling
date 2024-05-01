@@ -5,12 +5,14 @@ from model.cross_streets import CrossStreets
 from model.street import Street
 from enums.direction import Direction
 from ga.enums.termination_criteria import TerminationCriteria
-from random import randint
+import random
 
 
 class SolutionGenerator:
 
-    def __init__(self, street_map: Dict[int, Street], population_size: int, cross_streets_map: Dict[int, CrossStreets]):
+    def __init__(self, street_map: Dict[int, Street], population_size: int, cross_streets_map: Dict[int, CrossStreets],
+                 termination_criteria: TerminationCriteria, termination_value: int, mutation_size: int,
+                 mutation_generations: int):
         self.population_generator = PopulationGenerator(street_map)
         self.population_size = population_size
         self.cross_streets_map = cross_streets_map
@@ -18,43 +20,44 @@ class SolutionGenerator:
         self.generation: int = 0
         self.population: List[Individual] = []
         self.best_individual: Individual | None = None
+        self.termination_criteria: TerminationCriteria = termination_criteria
+        self.termination_value: int = termination_value
+        self.mutation_size: int = mutation_size
+        self.mutation_generations: int = mutation_generations
 
-    def start(self, termination_criteria: TerminationCriteria, termination_value: int):
+    def start(self):
         self.population = self.population_generator.generate_population(self.population_size)
         self.generation += 1
         print(f"Generation {self.generation}")
         self.work_generation(self.population)
-        while self.objetive_function(termination_criteria, termination_value) is False:
+        while self.objetive_function() is False:
             self.generation += 1
             print(f"Generation {self.generation}")
             self.work_generation(self.generate_population_by_roulette())
         print("BEST INDIVIDUAL FOUND:")
-        for gene in self.best_individual.genes.values():
-            print(vars(gene))
         self.best_individual.print_efficiency()
 
-    def objetive_function(self, criteria: TerminationCriteria, value: int) -> bool:
+    def objetive_function(self) -> bool:
         for individual in self.population:
             if self.best_individual is None:
                 self.best_individual = individual
             else:
                 if individual.aptitude > self.best_individual.aptitude:
                     self.best_individual = individual
-        if criteria == TerminationCriteria.GENERATION_NUMBER:
-            return value == self.generation
-        elif criteria == TerminationCriteria.EFFICIENCY_PERCENTAGE:
-            if value <= self.best_individual.aptitude:
+        if self.termination_criteria == TerminationCriteria.GENERATION_NUMBER:
+            return self.termination_value == self.generation
+        elif self.termination_criteria == TerminationCriteria.EFFICIENCY_PERCENTAGE:
+            if self.termination_value <= self.best_individual.aptitude:
                 return True
         return False
 
     def work_generation(self, population: List[Individual]):
+        self.apply_mutation()
         for individual in population:
             self.calculate_all_cross_percentages(individual)
         for index, individual in enumerate(population):
             print(index+1)
             print(individual)
-            for gene in individual.genes.values():
-                print(vars(gene))
             individual.print_efficiency()
 
     def calculate_all_cross_percentages(self, individual: Individual):
@@ -130,10 +133,10 @@ class SolutionGenerator:
     def cross_individuals(first: Individual, second: Individual) -> List[Individual]:
         keys = list(first.genes.keys())
         middle = len(keys) // 2
-        new_1 = {key: first.genes[key] for key in keys[:middle]}
-        new_1.update({key: second.genes[key] for key in keys[middle:]})
-        new_2 = {key: second.genes[key] for key in keys[:middle]}
-        new_2.update({key: first.genes[key] for key in keys[middle:]})
+        new_1 = {key: first.genes[key].copy() for key in keys[:middle]}
+        new_1.update({key: second.genes[key].copy() for key in keys[middle:]})
+        new_2 = {key: second.genes[key].copy() for key in keys[:middle]}
+        new_2.update({key: first.genes[key].copy() for key in keys[middle:]})
 
         new_individual_1 = Individual()
         new_individual_1.genes = new_1
@@ -143,9 +146,20 @@ class SolutionGenerator:
 
     def select_by_roulette(self) -> Individual:
         s = sum(individual.aptitude for individual in self.population)
-        a = randint(0, s)
+        a = random.randint(0, s)
         value = 0
         for individual in self.population:
             value = value + individual.aptitude
             if value >= a:
                 return individual
+
+    def apply_mutation(self):
+        if self.generation % self.mutation_generations == 0:
+            for i in range(self.mutation_size):
+                self.mutate(random.choice(self.population))
+
+    @staticmethod
+    def mutate(individual: Individual):
+        key: int = random.choice(list(individual.genes.keys()))
+        individual.genes[key].start_percentage = random.randint(0, 100)
+        individual.genes[key].end_percentage = random.randint(0, 100)

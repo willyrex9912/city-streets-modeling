@@ -409,8 +409,10 @@ class StreetSchemaEditor:
         return self.cross_streets_map[cross_id].street_map[street_id]
 
     def generate_solution(self):
-        solution_generator = SolutionGenerator(self.street_map, self.population_size, self.cross_streets_map)
-        solution_generator.start(self.termination_criteria, self.termination_value)
+        solution_generator = SolutionGenerator(self.street_map, self.population_size, self.cross_streets_map,
+                                               self.termination_criteria, self.termination_value, self.mutation_size,
+                                               self.mutation_generations)
+        solution_generator.start()
 
 
 def main():

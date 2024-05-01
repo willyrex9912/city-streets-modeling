@@ -14,6 +14,9 @@ class Individual:
         self.aptitude: int = 0
 
     def print_efficiency(self):
+        for gene in self.genes.values():
+            print(vars(gene))
+        print("Eff reference: ", self)
         print("Total inputs: ", self.total_inputs)
         print("Total outputs: ", self.total_outputs)
         output_percentage = 100 * self.total_outputs / self.total_inputs
