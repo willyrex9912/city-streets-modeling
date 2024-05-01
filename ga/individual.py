@@ -19,7 +19,10 @@ class Individual:
         print("Eff reference: ", self)
         print("Total inputs: ", self.total_inputs)
         print("Total outputs: ", self.total_outputs)
-        output_percentage = 100 * self.total_outputs / self.total_inputs
+        try:
+            output_percentage = 100 * self.total_outputs / self.total_inputs
+        except ZeroDivisionError:
+            output_percentage = 100
         print("Efficiency on input and outputs: " + str(output_percentage) + "%")
         average = statistics.mean(self.percentages_efficiency)
         print("Efficiency on percentages: " + str(average) + "%")
