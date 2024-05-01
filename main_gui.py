@@ -6,17 +6,11 @@ from enums.direction import Direction
 from ga.enums.termination_criteria import TerminationCriteria
 from ga.util.solution_generator import SolutionGenerator
 import tkinter as tk
-
-
-class StreetData:
-    def __init__(self, street_id: int, direction: Direction):
-        self.street_id = street_id
-        self.direction = direction
-        self.min = None
-        self.max = None
+import pickle
 
 
 class StreetSchemaEditor:
+
     def __init__(self, window):
         self.cross_streets_map: Dict[int, CrossStreets] = {}
         self.street_map: Dict[int, Street] = {}
@@ -70,12 +64,18 @@ class StreetSchemaEditor:
         self.btn_configure_streets_data = tk.Button(self.window, text="Generate solution", command=self.generate_solution)
         self.btn_configure_streets_data.grid(row=0, column=7, padx=5, pady=5)
 
+        self.btn_save_data = tk.Button(self.window, text="Save", command=self.save)
+        self.btn_save_data.grid(row=0, column=8, padx=5, pady=5)
+
+        self.btn_save_data = tk.Button(self.window, text="Load", command=self.load)
+        self.btn_save_data.grid(row=0, column=9, padx=5, pady=5)
+
         # Lienzo con fondo negro
         self.canvas = tk.Canvas(self.window, width=1200, height=600, bg="black")
-        self.canvas.grid(row=1, column=0, columnspan=8)
+        self.canvas.grid(row=1, column=0, columnspan=10)
 
         self.btn_exit = tk.Button(self.window, text="Exit", command=self.window.quit)
-        self.btn_exit.grid(row=2, column=0, columnspan=8, pady=10)
+        self.btn_exit.grid(row=2, column=0, columnspan=10, pady=10)
 
     def start_drag(self, event):
         self.last_x = event.x
@@ -147,6 +147,7 @@ class StreetSchemaEditor:
         if initial_cross_streets_id and final_cross_streets_id:
             street = self.canvas.create_line(initial_point[0], initial_point[1], final_point[0], final_point[1],
                                              width=2, arrow=tk.LAST, fill="yellow")
+            self.canvas.itemconfig(street, tags=("street", f"{street_id}"))
             self.canvas.create_text((initial_point[0] + final_point[0]) / 2,
                                     (initial_point[1] + final_point[1]) / 2 - 10, text=str(street_id), fill="white")
             self.canvas.tag_bind(street, "<Button-1>", self.start_drag)
@@ -158,6 +159,7 @@ class StreetSchemaEditor:
         elif initial_cross_streets_id:
             street = self.canvas.create_line(initial_point[0], initial_point[1], final_point[0], final_point[1],
                                              width=2, arrow=tk.LAST, fill="yellow")
+            self.canvas.itemconfig(street, tags=("street", f"{street_id}"))
             self.canvas.create_text((initial_point[0] + final_point[0]) / 2,
                                     (initial_point[1] + final_point[1]) / 2 - 10, text=str(street_id), fill="white")
             self.canvas.tag_bind(street, "<Button-1>", self.start_drag)
@@ -168,6 +170,7 @@ class StreetSchemaEditor:
         elif final_cross_streets_id:
             street = self.canvas.create_line(initial_point[0], initial_point[1], final_point[0], final_point[1],
                                              width=2, arrow=tk.LAST, fill="yellow")
+            self.canvas.itemconfig(street, tags=("street", f"{street_id}"))
             self.canvas.create_text((initial_point[0] + final_point[0]) / 2,
                                     (initial_point[1] + final_point[1]) / 2 - 10, text=str(street_id), fill="white")
             self.canvas.tag_bind(street, "<Button-1>", self.start_drag)
@@ -413,6 +416,72 @@ class StreetSchemaEditor:
                                                self.termination_criteria, self.termination_value, self.mutation_size,
                                                self.mutation_generations)
         solution_generator.start()
+
+    def save(self):
+        app_state = {
+            'street_map': self.street_map,
+            'cross_streets_map': self.cross_streets_map,
+            'population_size': self.population_size,
+            'mutation_size': self.mutation_size,
+            'mutation_generations': self.mutation_generations,
+            'termination_criteria': self.termination_criteria,
+            'termination_value': self.termination_value,
+            'canvas_elements': self.get_canvas_elements()
+        }
+        with open('data/project/project.csm', 'wb') as file:
+            pickle.dump(app_state, file)
+
+    def get_canvas_elements(self):
+        canvas_elements = {
+            'crosses': [],
+            'streets': []
+        }
+        for item in self.canvas.find_all():
+            tags = self.canvas.gettags(item)
+            if 'cross_streets' in tags:
+                x1, y1, x2, y2 = self.canvas.coords(item)
+                id_text = tags[1]
+                canvas_elements['crosses'].append((id_text, (x1, y1, x2, y2)))
+            elif 'street' in tags:
+                x1, y1, x2, y2 = self.canvas.coords(item)
+                id_text = tags[1]
+                canvas_elements['streets'].append((id_text, (x1, y1, x2, y2)))
+        return canvas_elements
+
+    def load(self):
+        with open('data/project/project.csm', 'rb') as file:
+            app_state = pickle.load(file)
+        self.street_map = app_state['street_map']
+        self.cross_streets_map = app_state['cross_streets_map']
+        self.population_size = app_state['population_size']
+        self.mutation_size = app_state['mutation_size']
+        self.mutation_generations = app_state['mutation_generations']
+        self.termination_criteria = app_state['termination_criteria']
+        self.termination_value = app_state['termination_value']
+        self.restore_canvas_elements(app_state['canvas_elements'])
+
+    def restore_canvas_elements(self, canvas_elements):
+        # Restaurar cruces
+        for id_text, coords in canvas_elements['crosses']:
+            x1, y1, x2, y2 = coords
+            cross_streets = self.canvas.create_oval(x1, y1, x2, y2, fill="blue")
+            new_id_text = self.canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2, text=id_text, fill="white")
+            self.canvas.itemconfig(cross_streets, tags=("cross_streets", id_text, new_id_text))
+            # Añadir las intersecciones restauradas al mapa de intersecciones
+            # cross_id = int(id_text)
+            # self.cross_streets_map[cross_id] = CrossStreets(cross_id)
+
+        # Restaurar calles
+        for id_text, coords in canvas_elements['streets']:
+            x1, y1, x2, y2 = coords
+            street = self.canvas.create_line(x1, y1, x2, y2, width=2, arrow=tk.LAST, fill="yellow")
+            self.canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2 - 10, text=id_text, fill="white")
+            self.canvas.tag_bind(street, "<Button-1>", self.start_drag)
+            # Añadir la calle al mapa de calles
+            # Suponiendo que el formato de id_text es "inicio_fin"
+            # initial_cross_id, final_cross_id = map(int, id_text.split("_"))
+            # self.cross_streets_map[initial_cross_id].add_street(id_text, Direction.START)
+            # self.cross_streets_map[final_cross_id].add_street(id_text, Direction.END)
 
 
 def main():

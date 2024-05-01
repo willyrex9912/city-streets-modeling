@@ -1,8 +1,33 @@
-import random
+import pickle
+from typing import List
 
-dict1 = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5}
-dict2 = {'a': 6, 'b': 7, 'c': 8, 'd': 9, 'e': 10}
 
-key = random.choice(list(dict1.keys()))
+class Person:
+    def __init__(self, name: str):
+        self.name = name
 
-print(key)
+
+class User:
+    def __init__(self, username:str, password: str):
+        self.person = Person(username)
+        self.password = password
+
+
+class GlobalData:
+    def __init__(self):
+        self.user = User("jessiel", "asdf@1234")
+
+
+# object1 = Object('object1')
+# object2 = Object('object2')
+# object3 = Object('object4')
+#
+# objects = [object1, object2, object3]
+#
+# with open('data/project/objects.csm', 'wb') as file:
+#     pickle.dump(GlobalData(), file)
+
+with open('data/project/objects.csm', 'rb') as file:
+    data: GlobalData = pickle.load(file)
+    print(data.user.person.name)
+
