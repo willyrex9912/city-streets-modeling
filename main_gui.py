@@ -447,7 +447,7 @@ class StreetSchemaEditor:
             }
             with open(self.file_path, 'wb') as file:
                 pickle.dump(app_state, file)
-            messagebox.showinfo("Success", f"File saved on {self.file_path}.")
+            messagebox.showinfo("Success", f"File saved on {self.file_path}")
 
     def get_canvas_elements(self):
         canvas_elements = {
@@ -487,6 +487,8 @@ class StreetSchemaEditor:
             self.restore_canvas_elements(app_state['canvas_elements'])
 
     def restore_canvas_elements(self, canvas_elements):
+        self.canvas.delete("all")
+
         for id_text, coords in canvas_elements['crosses']:
             x1, y1, x2, y2 = coords
             cross_streets = self.canvas.create_oval(x1, y1, x2, y2, fill="blue")
@@ -498,6 +500,7 @@ class StreetSchemaEditor:
             street = self.canvas.create_line(x1, y1, x2, y2, width=2, arrow=tk.LAST, fill="yellow")
             self.canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2 - 10, text=id_text, fill="white")
             self.canvas.tag_bind(street, "<Button-1>", self.start_drag)
+            self.canvas.itemconfig(street, tags=("street", id_text))
 
 
 def main():
