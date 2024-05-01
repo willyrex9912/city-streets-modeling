@@ -15,11 +15,11 @@ class StreetSchemaEditor:
         self.cross_streets_map: Dict[int, CrossStreets] = {}
         self.street_map: Dict[int, Street] = {}
 
-        self.street_listbox = None  # Variable para almacenar la lista de calles
+        self.street_listbox = None
 
         self.window = window
         self.window.title("Add street schema")
-        self.window.geometry("1200x600")  # Tamaño de la ventana
+        self.window.geometry("1200x600")
 
         self.ADD_CROSS_STREETS = False
         self.ADD_STREET = False
@@ -419,8 +419,12 @@ class StreetSchemaEditor:
 
     def save(self):
         app_state = {
-            'street_map': self.street_map,
             'cross_streets_map': self.cross_streets_map,
+            'street_map': self.street_map,
+            'street_listbox': self.street_listbox,
+            'id_cross_streets': self.id_cross_streets,
+            'id_street': self.id_street,
+            'street_data_index_map': self.street_data_index_map,
             'population_size': self.population_size,
             'mutation_size': self.mutation_size,
             'mutation_generations': self.mutation_generations,
@@ -451,8 +455,12 @@ class StreetSchemaEditor:
     def load(self):
         with open('data/project/project.csm', 'rb') as file:
             app_state = pickle.load(file)
-        self.street_map = app_state['street_map']
         self.cross_streets_map = app_state['cross_streets_map']
+        self.street_map = app_state['street_map']
+        self.street_listbox = app_state['street_listbox']
+        self.id_cross_streets = app_state['id_cross_streets']
+        self.id_street = app_state['id_street']
+        self.street_data_index_map = app_state['street_data_index_map']
         self.population_size = app_state['population_size']
         self.mutation_size = app_state['mutation_size']
         self.mutation_generations = app_state['mutation_generations']
@@ -461,27 +469,17 @@ class StreetSchemaEditor:
         self.restore_canvas_elements(app_state['canvas_elements'])
 
     def restore_canvas_elements(self, canvas_elements):
-        # Restaurar cruces
         for id_text, coords in canvas_elements['crosses']:
             x1, y1, x2, y2 = coords
             cross_streets = self.canvas.create_oval(x1, y1, x2, y2, fill="blue")
             new_id_text = self.canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2, text=id_text, fill="white")
             self.canvas.itemconfig(cross_streets, tags=("cross_streets", id_text, new_id_text))
-            # Añadir las intersecciones restauradas al mapa de intersecciones
-            # cross_id = int(id_text)
-            # self.cross_streets_map[cross_id] = CrossStreets(cross_id)
 
-        # Restaurar calles
         for id_text, coords in canvas_elements['streets']:
             x1, y1, x2, y2 = coords
             street = self.canvas.create_line(x1, y1, x2, y2, width=2, arrow=tk.LAST, fill="yellow")
             self.canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2 - 10, text=id_text, fill="white")
             self.canvas.tag_bind(street, "<Button-1>", self.start_drag)
-            # Añadir la calle al mapa de calles
-            # Suponiendo que el formato de id_text es "inicio_fin"
-            # initial_cross_id, final_cross_id = map(int, id_text.split("_"))
-            # self.cross_streets_map[initial_cross_id].add_street(id_text, Direction.START)
-            # self.cross_streets_map[final_cross_id].add_street(id_text, Direction.END)
 
 
 def main():
