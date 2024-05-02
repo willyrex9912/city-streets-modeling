@@ -81,21 +81,21 @@ class StreetSchemaEditor:
         self.canvas.grid(row=1, column=0, columnspan=10)
 
         # Console
-        self.info_text_frame = tk.Frame(self.window)
-        self.info_text_frame.grid(row=2, column=0, columnspan=10, sticky="nsew")
-        self.info_text_frame.grid_rowconfigure(0, weight=1)
-        self.info_text_frame.grid_columnconfigure(0, weight=1)
+        self.console_frame = tk.Frame(self.window)
+        self.console_frame.grid(row=2, column=0, columnspan=10, sticky="nsew")
+        self.console_frame.grid_rowconfigure(0, weight=1)
+        self.console_frame.grid_columnconfigure(0, weight=1)
 
-        self.info_text = tk.Text(self.info_text_frame, wrap="word", state=tk.DISABLED, width=212, height=10, background="gray")
-        self.info_text.grid(row=0, column=0, columnspan=10)
+        self.console = tk.Text(self.console_frame, wrap="word", state=tk.DISABLED, width=212, height=10, background="gray")
+        self.console.grid(row=0, column=0, columnspan=10)
 
-        scroll_y = tk.Scrollbar(self.info_text_frame, orient=tk.VERTICAL, command=self.info_text.yview)
+        scroll_y = tk.Scrollbar(self.console_frame, orient=tk.VERTICAL, command=self.console.yview)
         scroll_y.grid(row=0, column=10, sticky='ns')
-        self.info_text.config(yscrollcommand=scroll_y.set)
+        self.console.config(yscrollcommand=scroll_y.set)
 
-        scroll_x = tk.Scrollbar(self.info_text_frame, orient=tk.HORIZONTAL, command=self.info_text.xview)
+        scroll_x = tk.Scrollbar(self.console_frame, orient=tk.HORIZONTAL, command=self.console.xview)
         scroll_x.grid(row=1, column=0, columnspan=10, sticky='ew')
-        self.info_text.config(xscrollcommand=scroll_x.set)
+        self.console.config(xscrollcommand=scroll_x.set)
 
     def start_drag(self, event):
         self.last_x = event.x
@@ -436,8 +436,8 @@ class StreetSchemaEditor:
     def generate_solution(self):
         solution_generator = SolutionGenerator(self.street_map, self.population_size, self.cross_streets_map,
                                                self.termination_criteria, self.termination_value, self.mutation_size,
-                                               self.mutation_generations)
-        solution_generator.start(self.info_text)
+                                               self.mutation_generations, self.console)
+        solution_generator.start()
 
     def save(self):
         if not self.file_path:

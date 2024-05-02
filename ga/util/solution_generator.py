@@ -14,7 +14,7 @@ class SolutionGenerator:
 
     def __init__(self, street_map: Dict[int, Street], population_size: int, cross_streets_map: Dict[int, CrossStreets],
                  termination_criteria: TerminationCriteria, termination_value: int, mutation_size: int,
-                 mutation_generations: int):
+                 mutation_generations: int, console: tk.Text):
         self.population_generator = PopulationGenerator(street_map)
         self.population_size = population_size
         self.cross_streets_map = cross_streets_map
@@ -26,27 +26,27 @@ class SolutionGenerator:
         self.termination_value: int = termination_value
         self.mutation_size: int = mutation_size
         self.mutation_generations: int = mutation_generations
+        self.console = console
 
-    def start(self, console: tk.Text):
+    def start(self):
         self.population = self.population_generator.generate_population(self.population_size)
         self.generation += 1
         print(f"Generation {self.generation}")
-        self.write_console_info(f"Generation {self.generation}", console)
+        self.write_console_info(f"Generation {self.generation}")
         self.work_generation(self.population)
         while self.objetive_function() is False:
             self.generation += 1
             print(f"Generation {self.generation}")
-            self.write_console_info(f"Generation {self.generation}", console)
+            self.write_console_info(f"Generation {self.generation}")
             self.work_generation(self.generate_population_by_roulette())
         print("BEST INDIVIDUAL FOUND:")
         self.best_individual.print_efficiency()
         Grapher.graph(self.cross_streets_map, self.street_map, self.best_individual)
 
-    @staticmethod
-    def write_console_info(info: str, console: tk.Text):
-        console.config(state=tk.NORMAL)
-        console.insert(tk.END, info + "\n")
-        console.config(state=tk.DISABLED)
+    def write_console_info(self, info: str):
+        self.console.config(state=tk.NORMAL)
+        self.console.insert(tk.END, info + "\n")
+        self.console.config(state=tk.DISABLED)
 
     def objetive_function(self) -> bool:
         for individual in self.population:
