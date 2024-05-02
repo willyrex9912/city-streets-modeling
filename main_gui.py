@@ -20,7 +20,7 @@ class StreetSchemaEditor:
 
         self.window = window
         self.window.title("Add street schema")
-        self.window.geometry("1500x830")
+        self.window.geometry("1500x845")
 
         self.ADD_CROSS_STREETS = False
         self.ADD_STREET = False
@@ -86,7 +86,8 @@ class StreetSchemaEditor:
         self.console_frame.grid_rowconfigure(0, weight=1)
         self.console_frame.grid_columnconfigure(0, weight=1)
 
-        self.console = tk.Text(self.console_frame, wrap="word", state=tk.DISABLED, width=212, height=10, background="gray")
+        self.console = tk.Text(self.console_frame, wrap="word", state=tk.DISABLED, width=165, height=8,
+                               background="gray", font=1)
         self.console.grid(row=0, column=0, columnspan=10)
 
         scroll_y = tk.Scrollbar(self.console_frame, orient=tk.VERTICAL, command=self.console.yview)

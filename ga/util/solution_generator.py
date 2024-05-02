@@ -29,26 +29,49 @@ class SolutionGenerator:
         self.console = console
 
     def start(self):
+        self.clear_console()
         self.population = self.population_generator.generate_population(self.population_size)
         self.generation += 1
         self.work_generation(self.population)
         while self.objetive_function() is False:
             self.generation += 1
             self.work_generation(self.generate_population_by_roulette())
+        message = f"Best result on all generations:"
+        message += f" Total inputs: {self.best_individual.total_inputs}"
+        message += f" Total outputs: {self.best_individual.total_outputs}"
+        message += f" Total efficiency: {self.best_individual.aptitude}%"
+        self.write_console_info(message)
         Grapher.graph(self.cross_streets_map, self.street_map, self.best_individual)
 
     def write_console_info(self, info: str):
         self.console.config(state=tk.NORMAL)
         self.console.insert(tk.END, info + "\n")
+        self.console.see(tk.END)
+        self.console.config(state=tk.DISABLED)
+
+    def clear_console(self):
+        self.console.config(state=tk.NORMAL)
+        self.console.delete("1.0", tk.END)
         self.console.config(state=tk.DISABLED)
 
     def objetive_function(self) -> bool:
+        best_individual_generation: Individual | None = None
         for individual in self.population:
             if self.best_individual is None:
                 self.best_individual = individual
             else:
                 if individual.aptitude > self.best_individual.aptitude:
                     self.best_individual = individual
+            if best_individual_generation is None:
+                best_individual_generation = individual
+            else:
+                if individual.aptitude > best_individual_generation.aptitude:
+                    best_individual_generation = individual
+        message = f"Best result on generation {self.generation} :"
+        message += f" Total inputs: {best_individual_generation.total_inputs}"
+        message += f" Total outputs: {best_individual_generation.total_outputs}"
+        message += f" Total efficiency: {best_individual_generation.aptitude}%"
+        self.write_console_info(message)
         if self.termination_criteria == TerminationCriteria.GENERATION_NUMBER:
             return self.termination_value == self.generation
         elif self.termination_criteria == TerminationCriteria.EFFICIENCY_PERCENTAGE:
