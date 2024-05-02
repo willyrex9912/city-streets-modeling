@@ -7,6 +7,7 @@ from model.street import Street
 from enums.direction import Direction
 from ga.enums.termination_criteria import TerminationCriteria
 from util.grapher import Grapher
+from util.run_state import RunState
 import random
 
 
@@ -14,7 +15,7 @@ class SolutionGenerator:
 
     def __init__(self, street_map: Dict[int, Street], population_size: int, cross_streets_map: Dict[int, CrossStreets],
                  termination_criteria: TerminationCriteria, termination_value: int, mutation_size: int,
-                 mutation_generations: int, console: tk.Text):
+                 mutation_generations: int, console: tk.Text, run_state: RunState):
         self.population_generator = PopulationGenerator(street_map)
         self.population_size = population_size
         self.cross_streets_map = cross_streets_map
@@ -27,13 +28,14 @@ class SolutionGenerator:
         self.mutation_size: int = mutation_size
         self.mutation_generations: int = mutation_generations
         self.console = console
+        self.run_state = run_state
 
     def start(self):
         self.clear_console()
         self.population = self.population_generator.generate_population(self.population_size)
         self.generation += 1
         self.work_generation(self.population)
-        while self.objetive_function() is False:
+        while self.run_state.run is True and self.objetive_function() is False:
             self.generation += 1
             self.work_generation(self.generate_population_by_roulette())
         message = f"Best result on all generations:"

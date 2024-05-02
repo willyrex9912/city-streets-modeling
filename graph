@@ -1,14 +1,14 @@
 digraph {
 	rankdir=LR
 	1 [label="Cross 1
-In = [ 1:40% ]
-Out = [ 3:83% ]"]
+In = [ 1:60% ]
+Out = [ 3:95% ]"]
 	2 [label="Cross 2
-In = [ 2:22% ]
-Out = [ 4:9% ]"]
+In = [ 2:11% ]
+Out = [ 4:0% ]"]
 	3 [label="Cross 3
-In = [ 3:83% 4:9% ]
-Out = [ 5:86% ]"]
+In = [ 3:95% 4:0% ]
+Out = [ 5:85% ]"]
 	"Dummy 1" [style=invisible]
 	"Dummy 1" -> 1 [label="Street 1"]
 	"Dummy 2" [style=invisible]
@@ -18,6 +18,6 @@ Out = [ 5:86% ]"]
 	"Dummy 5" [style=invisible]
 	3 -> "Dummy 5" [label="Street 5"]
 	label="Total inputs: 100
-Total outputs: 63
-Total efficiency: 73%"
+Total outputs: 70
+Total efficiency: 85%"
 }

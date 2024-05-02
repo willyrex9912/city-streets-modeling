@@ -1,29 +1,39 @@
 import tkinter as tk
+from threading import Thread
 
-def mostrar_info():
-    info_text.config(state=tk.NORMAL)
-    info_text.insert(tk.END, "Aquí va tu información...\n")
-    info_text.config(state=tk.DISABLED)
+class MiApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Ejemplo de Hilo con Tkinter")
 
-# Crear ventana principal
-ventana = tk.Tk()
-ventana.title("Área de Información")
+        self.label = tk.Label(root, text="Hilo detenido")
+        self.label.pack()
 
-# Crear área de texto para mostrar la información
-info_text = tk.Text(ventana, wrap="word", state=tk.DISABLED)
-info_text.pack(fill=tk.BOTH, expand=True)
+        self.button = tk.Button(root, text="Comenzar Hilo", command=self.toggle_thread)
+        self.button.pack()
 
-# Botón para mostrar información (solo un ejemplo, puedes manejar eventos como desees)
-boton_mostrar = tk.Button(ventana, text="Mostrar Información", command=mostrar_info)
-boton_mostrar.pack()
+        self.running = False
+        self.thread = None
 
-# Barras de desplazamiento
-scroll_y = tk.Scrollbar(ventana, orient=tk.VERTICAL, command=info_text.yview)
-scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
-info_text.config(yscrollcommand=scroll_y.set)
+    def toggle_thread(self):
+        if self.running:
+            self.running = False
+            self.button.config(text="Comenzar Hilo")
+            self.label.config(text="Hilo detenido")
+        else:
+            self.running = True
+            self.button.config(text="Detener Hilo")
+            self.label.config(text="Hilo en ejecución")
+            self.thread = Thread(target=self.proceso_infinito)
+            self.thread.start()
 
-scroll_x = tk.Scrollbar(ventana, orient=tk.HORIZONTAL, command=info_text.xview)
-scroll_x.pack(side=tk.BOTTOM, fill=tk.X)
-info_text.config(xscrollcommand=scroll_x.set)
+    def proceso_infinito(self):
+        while self.running:
+            # Aquí colocas el proceso que quieres ejecutar en el hilo
+            print("Hilo en ejecución...")
+            # Por ejemplo, puedes usar time.sleep() para simular un proceso largo
+            # time.sleep(1)
 
-ventana.mainloop()
+root = tk.Tk()
+app = MiApp(root)
+root.mainloop()

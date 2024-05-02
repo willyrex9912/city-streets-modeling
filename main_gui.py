@@ -7,6 +7,8 @@ from ga.enums.termination_criteria import TerminationCriteria
 from ga.util.solution_generator import SolutionGenerator
 import tkinter as tk
 from tkinter import filedialog
+from threading import Thread
+from util.run_state import RunState
 import pickle
 
 
@@ -39,6 +41,8 @@ class StreetSchemaEditor:
         self.termination_value = 100
 
         self.file_path = ""
+        self.run_state = RunState(False)
+        self.thread = None
 
         self.create_widgets()
 
@@ -66,9 +70,9 @@ class StreetSchemaEditor:
                                                   command=self.configure_termination_criteria)
         self.btn_termination_criteria.grid(row=0, column=6, padx=5, pady=5)
 
-        self.btn_configure_streets_data = tk.Button(self.window, text="Generate solution",
-                                                    command=self.generate_solution)
-        self.btn_configure_streets_data.grid(row=0, column=7, padx=5, pady=5)
+        self.btn_generate_solution = tk.Button(self.window, text="Generate solution",
+                                                    command=self.toggle_thread)
+        self.btn_generate_solution.grid(row=0, column=7, padx=5, pady=5)
 
         self.btn_save_data = tk.Button(self.window, text="Save", command=self.save)
         self.btn_save_data.grid(row=0, column=8, padx=5, pady=5)
@@ -430,11 +434,23 @@ class StreetSchemaEditor:
         cross_id = self.street_data_index_map[index][1]
         return self.cross_streets_map[cross_id].street_map[street_id]
 
+    def toggle_thread(self):
+        if self.run_state.run:
+            self.run_state.stop_run()
+            self.btn_generate_solution.config(text="Generate solution")
+        else:
+            self.run_state.start_run()
+            self.btn_generate_solution.config(text="Stop generation")
+            self.thread = Thread(target=self.generate_solution)
+            self.thread.start()
+
     def generate_solution(self):
         solution_generator = SolutionGenerator(self.street_map, self.population_size, self.cross_streets_map,
                                                self.termination_criteria, self.termination_value, self.mutation_size,
-                                               self.mutation_generations, self.console)
+                                               self.mutation_generations, self.console, self.run_state)
         solution_generator.start()
+        self.run_state.stop_run()
+        self.btn_generate_solution.config(text="Generate solution")
 
     def save(self):
         if not self.file_path:
