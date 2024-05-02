@@ -137,9 +137,27 @@ class SolutionGenerator:
         input_percentage = 0
         for street in input_streets:
             input_percentage += individual.genes[street.street_id].end_percentage
+            # Min and max percentage criteria
+            if individual.genes[street.street_id].end_percentage >= street.min_percentage:
+                individual.min_percentages_efficiency.append(100)
+            else:
+                individual.min_percentages_efficiency.append(0)
+            if individual.genes[street.street_id].end_percentage <= street.max_percentage:
+                individual.max_percentages_efficiency.append(100)
+            else:
+                individual.max_percentages_efficiency.append(0)
         output_percentage = 0
         for street in input_streets:
             output_percentage += individual.genes[street.street_id].start_percentage
+            # Min and max percentage criteria
+            if individual.genes[street.street_id].start_percentage >= street.min_percentage:
+                individual.min_percentages_efficiency.append(100)
+            else:
+                individual.min_percentages_efficiency.append(0)
+            if individual.genes[street.street_id].start_percentage <= street.max_percentage:
+                individual.max_percentages_efficiency.append(100)
+            else:
+                individual.max_percentages_efficiency.append(0)
         if input_percentage <= 100 and output_percentage <= 100:
             individual.percentages_efficiency.append(100)
         elif input_percentage <= 100 or output_percentage <= 100:
