@@ -150,7 +150,6 @@ class StreetSchemaEditor:
         self.canvas.itemconfig(cross_streets, tags=("cross_streets", f"{self.id_cross_streets}", id_text))
         cross = CrossStreets(self.id_cross_streets)
         self.cross_streets_map[self.id_cross_streets] = cross
-        print(f"Cross streets {cross.id} added.")
         self.id_cross_streets += 1
 
     def add_street_event(self, initial_point, final_point, street_id):
@@ -175,7 +174,6 @@ class StreetSchemaEditor:
             self.street_map[street_id] = new_street
             self.cross_streets_map[new_street.start_cross_id].add_street(street_id, Direction.START)
             self.cross_streets_map[new_street.end_cross_id].add_street(street_id, Direction.END)
-            print(f"Street {street_id} from {initial_cross_streets_id} to {final_cross_streets_id} added.")
         elif initial_cross_streets_id:
             street = self.canvas.create_line(initial_point[0], initial_point[1], final_point[0], final_point[1],
                                              width=2, arrow=tk.LAST, fill="yellow")
@@ -186,7 +184,6 @@ class StreetSchemaEditor:
             new_street = Street(street_id, int(initial_cross_streets_id), None)
             self.street_map[street_id] = new_street
             self.cross_streets_map[new_street.start_cross_id].add_street(street_id, Direction.START)
-            print(f"Street {street_id} from {initial_cross_streets_id} to {final_point} added.")
         elif final_cross_streets_id:
             street = self.canvas.create_line(initial_point[0], initial_point[1], final_point[0], final_point[1],
                                              width=2, arrow=tk.LAST, fill="yellow")
@@ -197,9 +194,8 @@ class StreetSchemaEditor:
             new_street = Street(street_id, None, int(final_cross_streets_id))
             self.street_map[street_id] = new_street
             self.cross_streets_map[new_street.end_cross_id].add_street(street_id, Direction.END)
-            print(f"Street {street_id} from {initial_point} to {final_cross_streets_id} added.")
         else:
-            print("Error: No selected cross streets")
+            messagebox.showerror("Error", "No selected cross streets")
 
     def configure_streets(self):
         def update_capacity():

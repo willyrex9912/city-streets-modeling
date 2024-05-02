@@ -31,16 +31,10 @@ class SolutionGenerator:
     def start(self):
         self.population = self.population_generator.generate_population(self.population_size)
         self.generation += 1
-        print(f"Generation {self.generation}")
-        self.write_console_info(f"Generation {self.generation}")
         self.work_generation(self.population)
         while self.objetive_function() is False:
             self.generation += 1
-            print(f"Generation {self.generation}")
-            self.write_console_info(f"Generation {self.generation}")
             self.work_generation(self.generate_population_by_roulette())
-        print("BEST INDIVIDUAL FOUND:")
-        self.best_individual.print_efficiency()
         Grapher.graph(self.cross_streets_map, self.street_map, self.best_individual)
 
     def write_console_info(self, info: str):
@@ -66,10 +60,7 @@ class SolutionGenerator:
         self.apply_mutation()
         for individual in population:
             self.calculate_all_cross_percentages(individual)
-        for index, individual in enumerate(population):
-            print(index+1)
-            print(individual)
-            individual.print_efficiency()
+            individual.calculate_efficiency()
 
     def calculate_all_cross_percentages(self, individual: Individual):
         for cross in self.cross_streets_map.values():
