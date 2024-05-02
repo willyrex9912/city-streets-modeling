@@ -20,7 +20,7 @@ class StreetSchemaEditor:
 
         self.window = window
         self.window.title("Add street schema")
-        self.window.geometry("1200x600")
+        self.window.geometry("1500x830")
 
         self.ADD_CROSS_STREETS = False
         self.ADD_STREET = False
@@ -76,12 +76,26 @@ class StreetSchemaEditor:
         self.btn_load_data = tk.Button(self.window, text="Load", command=self.load)
         self.btn_load_data.grid(row=0, column=9, padx=5, pady=5)
 
-        # Lienzo con fondo negro
-        self.canvas = tk.Canvas(self.window, width=1200, height=600, bg="black")
+        # Draw area
+        self.canvas = tk.Canvas(self.window, width=1500, height=600, bg="black")
         self.canvas.grid(row=1, column=0, columnspan=10)
 
-        self.btn_exit = tk.Button(self.window, text="Exit", command=self.window.quit)
-        self.btn_exit.grid(row=2, column=0, columnspan=10, pady=10)
+        # Console
+        self.info_text_frame = tk.Frame(self.window)
+        self.info_text_frame.grid(row=2, column=0, columnspan=10, sticky="nsew")
+        self.info_text_frame.grid_rowconfigure(0, weight=1)
+        self.info_text_frame.grid_columnconfigure(0, weight=1)
+
+        self.info_text = tk.Text(self.info_text_frame, wrap="word", state=tk.DISABLED, width=212, height=10, background="gray")
+        self.info_text.grid(row=0, column=0, columnspan=10)
+
+        scroll_y = tk.Scrollbar(self.info_text_frame, orient=tk.VERTICAL, command=self.info_text.yview)
+        scroll_y.grid(row=0, column=10, sticky='ns')
+        self.info_text.config(yscrollcommand=scroll_y.set)
+
+        scroll_x = tk.Scrollbar(self.info_text_frame, orient=tk.HORIZONTAL, command=self.info_text.xview)
+        scroll_x.grid(row=1, column=0, columnspan=10, sticky='ew')
+        self.info_text.config(xscrollcommand=scroll_x.set)
 
     def start_drag(self, event):
         self.last_x = event.x
@@ -423,7 +437,7 @@ class StreetSchemaEditor:
         solution_generator = SolutionGenerator(self.street_map, self.population_size, self.cross_streets_map,
                                                self.termination_criteria, self.termination_value, self.mutation_size,
                                                self.mutation_generations)
-        solution_generator.start()
+        solution_generator.start(self.info_text)
 
     def save(self):
         if not self.file_path:

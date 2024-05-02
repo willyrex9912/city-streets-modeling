@@ -1,25 +1,29 @@
-from graphviz import Digraph
+import tkinter as tk
 
-# Crear un objeto Digraph
-dot = Digraph()
+def mostrar_info():
+    info_text.config(state=tk.NORMAL)
+    info_text.insert(tk.END, "Aquí va tu información...\n")
+    info_text.config(state=tk.DISABLED)
 
-# Agregar nodos
-dot.node('A', 'Node A. \nEntradas:\n B: 45%, C: 35%\n Salidas:\n B: 45%, C: 35%')
-dot.node('B', 'Node B')
-dot.node('C', 'Node C')
+# Crear ventana principal
+ventana = tk.Tk()
+ventana.title("Área de Información")
 
-# Agregar aristas
-dot.edge('A', 'B', 'Edge AB')
-dot.edge('B', 'C', 'Edge BC')
-dot.edge('C', 'A', 'Edge CA')
+# Crear área de texto para mostrar la información
+info_text = tk.Text(ventana, wrap="word", state=tk.DISABLED)
+info_text.pack(fill=tk.BOTH, expand=True)
 
-# Agregar una línea que sale del nodo A pero no entra en ningún otro nodo
-dot.node('Dummy', style='invisible')  # Nodo invisible
-dot.edge('A', 'Dummy')  # Arista hacia el nodo invisible
-dot.edge('Dummy', 'B', label="45%")
+# Botón para mostrar información (solo un ejemplo, puedes manejar eventos como desees)
+boton_mostrar = tk.Button(ventana, text="Mostrar Información", command=mostrar_info)
+boton_mostrar.pack()
 
-# Renderizar el gráfico
-dot.render('graph', format='png', cleanup=True)
+# Barras de desplazamiento
+scroll_y = tk.Scrollbar(ventana, orient=tk.VERTICAL, command=info_text.yview)
+scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
+info_text.config(yscrollcommand=scroll_y.set)
 
-# Visualizar el gráfico
-dot.view()
+scroll_x = tk.Scrollbar(ventana, orient=tk.HORIZONTAL, command=info_text.xview)
+scroll_x.pack(side=tk.BOTTOM, fill=tk.X)
+info_text.config(xscrollcommand=scroll_x.set)
+
+ventana.mainloop()

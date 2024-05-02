@@ -1,3 +1,4 @@
+import tkinter as tk
 from ga.util.population_generator import PopulationGenerator
 from typing import List, Dict
 from ga.individual import Individual
@@ -26,18 +27,26 @@ class SolutionGenerator:
         self.mutation_size: int = mutation_size
         self.mutation_generations: int = mutation_generations
 
-    def start(self):
+    def start(self, console: tk.Text):
         self.population = self.population_generator.generate_population(self.population_size)
         self.generation += 1
         print(f"Generation {self.generation}")
+        self.write_console_info(f"Generation {self.generation}", console)
         self.work_generation(self.population)
         while self.objetive_function() is False:
             self.generation += 1
             print(f"Generation {self.generation}")
+            self.write_console_info(f"Generation {self.generation}", console)
             self.work_generation(self.generate_population_by_roulette())
         print("BEST INDIVIDUAL FOUND:")
         self.best_individual.print_efficiency()
         Grapher.graph(self.cross_streets_map, self.street_map, self.best_individual)
+
+    @staticmethod
+    def write_console_info(info: str, console: tk.Text):
+        console.config(state=tk.NORMAL)
+        console.insert(tk.END, info + "\n")
+        console.config(state=tk.DISABLED)
 
     def objetive_function(self) -> bool:
         for individual in self.population:
