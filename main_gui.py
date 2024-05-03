@@ -9,6 +9,7 @@ import tkinter as tk
 from tkinter import filedialog
 from threading import Thread
 from util.run_state import RunState
+from util.grapher import Grapher
 import pickle
 
 
@@ -70,36 +71,38 @@ class StreetSchemaEditor:
                                                   command=self.configure_termination_criteria)
         self.btn_termination_criteria.grid(row=0, column=6, padx=5, pady=5)
 
-        self.btn_generate_solution = tk.Button(self.window, text="Generate solution",
-                                                    command=self.toggle_thread)
-        self.btn_generate_solution.grid(row=0, column=7, padx=5, pady=5)
+        self.btn_preview = tk.Button(self.window, text="Preview", command=self.preview)
+        self.btn_preview.grid(row=0, column=7, padx=5, pady=5)
+
+        self.btn_generate_solution = tk.Button(self.window, text="Generate solution", command=self.toggle_thread)
+        self.btn_generate_solution.grid(row=0, column=8, padx=5, pady=5)
 
         self.btn_save_data = tk.Button(self.window, text="Save", command=self.save)
-        self.btn_save_data.grid(row=0, column=8, padx=5, pady=5)
+        self.btn_save_data.grid(row=0, column=9, padx=5, pady=5)
 
         self.btn_load_data = tk.Button(self.window, text="Load", command=self.load)
-        self.btn_load_data.grid(row=0, column=9, padx=5, pady=5)
+        self.btn_load_data.grid(row=0, column=10, padx=5, pady=5)
 
         # Draw area
         self.canvas = tk.Canvas(self.window, width=1500, height=600, bg="black")
-        self.canvas.grid(row=1, column=0, columnspan=10)
+        self.canvas.grid(row=1, column=0, columnspan=11)
 
         # Console
         self.console_frame = tk.Frame(self.window)
-        self.console_frame.grid(row=2, column=0, columnspan=10, sticky="nsew")
+        self.console_frame.grid(row=2, column=0, columnspan=11, sticky="nsew")
         self.console_frame.grid_rowconfigure(0, weight=1)
         self.console_frame.grid_columnconfigure(0, weight=1)
 
         self.console = tk.Text(self.console_frame, wrap="word", state=tk.DISABLED, width=165, height=8,
                                background="gray", font=1)
-        self.console.grid(row=0, column=0, columnspan=10)
+        self.console.grid(row=0, column=0, columnspan=11)
 
         scroll_y = tk.Scrollbar(self.console_frame, orient=tk.VERTICAL, command=self.console.yview)
-        scroll_y.grid(row=0, column=10, sticky='ns')
+        scroll_y.grid(row=0, column=11, sticky='ns')
         self.console.config(yscrollcommand=scroll_y.set)
 
         scroll_x = tk.Scrollbar(self.console_frame, orient=tk.HORIZONTAL, command=self.console.xview)
-        scroll_x.grid(row=1, column=0, columnspan=10, sticky='ew')
+        scroll_x.grid(row=1, column=0, columnspan=11, sticky='ew')
         self.console.config(xscrollcommand=scroll_x.set)
 
     def start_drag(self, event):
@@ -433,6 +436,10 @@ class StreetSchemaEditor:
         street_id = self.street_data_index_map[index][0]
         cross_id = self.street_data_index_map[index][1]
         return self.cross_streets_map[cross_id].street_map[street_id]
+
+    def preview(self):
+        Grapher.pre_graph(self.cross_streets_map, self.street_map, self.population_size, self.mutation_size,
+                          self.mutation_generations, self.termination_criteria, self.termination_value)
 
     def toggle_thread(self):
         if self.run_state.run:
