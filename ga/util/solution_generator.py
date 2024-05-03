@@ -116,13 +116,12 @@ class SolutionGenerator:
                 if start_number is None:
                     self.calculate_cross_percentages(main_street.start_cross_id, individual)
                     start_number = gen.start_number
-                max_number = round(main_street.capacity * (gen.end_percentage / 100))
-                if start_number <= max_number:
+                if start_number <= main_street.capacity:
                     gen.end_number = start_number
                     total_number += start_number
                 else:
-                    gen.end_number = max_number
-                    total_number += max_number
+                    gen.end_number = main_street.capacity
+                    total_number += main_street.capacity
         for street in output_streets:
             main_street = self.street_map[street.street_id]
             gen = individual.genes[main_street.id]
@@ -133,21 +132,9 @@ class SolutionGenerator:
             if main_street.end_cross_id is None:
                 individual.total_outputs += gen.start_number
         cross.evaluated = True
-        # Input percentage save to verify after
-        input_percentage = 0
-        for street in input_streets:
-            input_percentage += individual.genes[street.street_id].end_percentage
-            # Min and max percentage criteria
-            if individual.genes[street.street_id].end_percentage >= street.min_percentage:
-                individual.min_percentages_efficiency.append(100)
-            else:
-                individual.min_percentages_efficiency.append(0)
-            if individual.genes[street.street_id].end_percentage <= street.max_percentage:
-                individual.max_percentages_efficiency.append(100)
-            else:
-                individual.max_percentages_efficiency.append(0)
+        # Output percentage save to verify after
         output_percentage = 0
-        for street in input_streets:
+        for street in output_streets:
             output_percentage += individual.genes[street.street_id].start_percentage
             # Min and max percentage criteria
             if individual.genes[street.street_id].start_percentage >= street.min_percentage:
@@ -158,10 +145,8 @@ class SolutionGenerator:
                 individual.max_percentages_efficiency.append(100)
             else:
                 individual.max_percentages_efficiency.append(0)
-        if input_percentage <= 100 and output_percentage <= 100:
+        if output_percentage <= 100:
             individual.percentages_efficiency.append(100)
-        elif input_percentage <= 100 or output_percentage <= 100:
-            individual.percentages_efficiency.append(50)
         else:
             individual.percentages_efficiency.append(0)
 
@@ -191,7 +176,7 @@ class SolutionGenerator:
 
     def select_by_roulette(self) -> Individual:
         s = sum(individual.aptitude for individual in self.population)
-        a = random.randint(0, s)
+        a = random.randint(0, int(s))
         value = 0
         for individual in self.population:
             value = value + individual.aptitude

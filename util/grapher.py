@@ -17,17 +17,11 @@ class Grapher:
         for key, cross in cross_streets_map.items():
             name = str(key)
             label = "Cross " + name
-            data_list: List[StreetData] = cross.get_streets_by_direction(Direction.END)
-            if len(data_list) > 0:
-                label += "\nIn = [ "
-                for data in data_list:
-                    label += str(data.street_id) + ":" + str(individual.genes[data.street_id].end_percentage) + "% "
-                label += "]"
             data_list: List[StreetData] = cross.get_streets_by_direction(Direction.START)
             if len(data_list) > 0:
                 label += "\nOut = [ "
                 for data in data_list:
-                    label += str(data.street_id) + ":" + str(individual.genes[data.street_id].end_percentage) + "% "
+                    label += str(data.street_id) + ":" + str(individual.genes[data.street_id].start_percentage) + "% "
                 label += "]"
             dot.node(name, label)
         for key, street in street_map.items():
