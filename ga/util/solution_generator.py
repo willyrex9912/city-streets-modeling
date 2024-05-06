@@ -126,7 +126,7 @@ class SolutionGenerator:
             main_street = self.street_map[street.street_id]
             gen = individual.genes[main_street.id]
             max_number = main_street.capacity
-            gen.start_number = round(total_number * (gen.start_percentage/100))
+            gen.start_number = int(total_number * (gen.start_percentage/100))
             if gen.start_number > max_number:
                 gen.start_number = max_number
             if main_street.end_cross_id is None:

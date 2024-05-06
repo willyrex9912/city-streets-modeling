@@ -23,4 +23,4 @@ class Individual:
         mean_percentages = statistics.mean(self.percentages_efficiency)
         mean_min_percentages = statistics.mean(self.min_percentages_efficiency)
         mean_max_percentages = statistics.mean(self.min_percentages_efficiency)
-        self.aptitude = (output_percentage + mean_percentages + mean_min_percentages + mean_max_percentages) / 4
+        self.aptitude = round((output_percentage + mean_percentages + mean_percentages + mean_min_percentages) / 4, 2)

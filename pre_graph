@@ -1,0 +1,79 @@
+digraph {
+	rankdir=LR
+	1 [label="Cross 1"]
+	2 [label="Cross 2"]
+	3 [label="Cross 3"]
+	4 [label="Cross 4"]
+	5 [label="Cross 5"]
+	6 [label="Cross 6"]
+	7 [label="Cross 7"]
+	8 [label="Cross 8"]
+	9 [label="Cross 9"]
+	10 [label="Cross 10"]
+	11 [label="Cross 11"]
+	12 [label="Cross 12"]
+	"Dummy 1" [style=invisible]
+	"Dummy 1" -> 1 [label="Street 1
+Capacity: 50"]
+	"Dummy 2" [style=invisible]
+	"Dummy 2" -> 2 [label="Street 2
+Capacity: 50"]
+	1 -> 3 [label="Street 3
+Capacity: 50
+Min: 0%"]
+	2 -> 3 [label="Street 4
+Capacity: 50
+Min: 0%"]
+	3 -> 5 [label="Street 5
+Capacity: 60
+Min: 0%"]
+	3 -> 4 [label="Street 6
+Capacity: 20
+Min: 0%"]
+	4 -> 6 [label="Street 7
+Capacity: 10
+Min: 0%"]
+	4 -> 7 [label="Street 8
+Capacity: 10
+Min: 0%"]
+	3 -> 7 [label="Street 9
+Capacity: 20
+Min: 0%"]
+	5 -> 7 [label="Street 10
+Capacity: 60
+Min: 0%"]
+	6 -> 8 [label="Street 11
+Capacity: 5
+Min: 0%"]
+	6 -> 9 [label="Street 12
+Capacity: 5
+Min: 0%"]
+	7 -> 10 [label="Street 13
+Capacity: 90
+Min: 0%"]
+	9 -> 11 [label="Street 14
+Capacity: 5
+Min: 0%"]
+	10 -> 11 [label="Street 15
+Capacity: 60
+Min: 0%"]
+	8 -> 12 [label="Street 16
+Capacity: 5
+Min: 0%"]
+	"Dummy 17" [style=invisible]
+	12 -> "Dummy 17" [label="Street 17
+Capacity: 5
+Min: 0%"]
+	"Dummy 18" [style=invisible]
+	11 -> "Dummy 18" [label="Street 18
+Capacity: 65
+Min: 0%"]
+	"Dummy 19" [style=invisible]
+	10 -> "Dummy 19" [label="Street 19
+Capacity: 30
+Min: 0%"]
+	label="Population size: 1000
+Mutation: 1000 mutations every 1 generations
+Termination criteria: Generation number (1000)
+"
+}
